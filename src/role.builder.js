@@ -4,7 +4,7 @@ var roleBuilder = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if(creep.memory.target != undefined && creep.memory.target != creep.room.name){
+        if(creep.memory.target != creep.room.name){
              creep.changeRoom();
         } else {
     	    if(creep.memory.state && creep.store[RESOURCE_ENERGY] == 0) {
