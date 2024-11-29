@@ -2,6 +2,7 @@
   "dependencies": {
     "@types/lodash": "^4.17.13",
     "@types/screeps": "^3.3.8",
-    "grunt-screeps": "^1.5.0"
+    "grunt-screeps": "^1.5.0",
+    "screeps-profiler": "^2.0.1"
   }
 }
