@@ -1,3 +1,5 @@
+const roleMaintainer = require('role.maintenance')
+
 module.exports = {
     run: function(creep) {
        creep.switchWorkState();

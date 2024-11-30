@@ -3,7 +3,9 @@ let roleBuilder = require('./role.builder');
 module.exports = {
     // a function to run the logic for this role
     run: function(creep) {
-        
+        if(creep.memory.target === undefined){
+            creep.memory.target = creep.room.name;
+        }
         creep.switchWorkState();
         // if creep is supposed to repair something
         if (creep.memory.state == true) {
