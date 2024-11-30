@@ -1,18 +1,4 @@
-//require('prototype.spawn')();
-var costumCreep = require('prototype.spawn');
-var roleHarvester = require('role.harvester');
-var roleUpgrader = require('role.upgrader');
-var roleBuilder = require('role.builder');
-var roleMiner = require('role.miner');
-var roleMaintenance = require('role.maintenance');
-var roleWallRepairer = require('role.wallRepairer');
-var roleLongDistanceHarvester = require('role.longDistanceHarvester');
-var roleTransporter = require('role.transport');
-var roleClaimer = require('role.claimer');
-//var structureTower = require('structure.tower');
-
-const { forEach } = require('lodash');
-
+require('prototype.room');
 require('prototype.spawn');
 require('prototype.tower');
 require('prototype.creep');
@@ -30,6 +16,11 @@ module.exports.loop = function () {
                 delete Memory.creeps[creep];
             }
         }
+        
+        for(let room in Memory.rooms){
+            Game.rooms[room].createJobs();
+        }
+
         // find all towers
         var towers = _.filter(Game.structures, s => s.structureType == STRUCTURE_TOWER);
         // for each tower

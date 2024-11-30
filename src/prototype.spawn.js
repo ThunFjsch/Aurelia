@@ -315,7 +315,6 @@ StructureSpawn.prototype.createMiner = function (energy, sourceId, roleName) {
         }
     }
     body.push(MOVE);
-    console.log('create ' + sourceId)
     return this.spawnCreep(body, generateName(roleName), {memory: { role: roleName, sourceId: sourceId }}
     );
 };
