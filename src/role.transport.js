@@ -4,6 +4,7 @@ module.exports = {
         creep.switchWorkState();
         // if creep is supposed to transfer energy to the spawn
         if (creep.memory.state) {
+            
             var targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_EXTENSION || 
@@ -23,7 +24,23 @@ module.exports = {
         }
         // if creep is supposed to harvest energy from source
         else {
-            creep.getEnergy(false);
+            if(creep.memory.pickup === undefined){
+                for(let job in creep.room.memory.pickups){
+                    if(!creep.room.memory.pickups[job].isAssigned){
+                        creep.memory.pickup = {target: creep.room.memory.pickups[job].target, job: creep.room.memory.pickups[job].name};
+                        creep.room.memory.pickups[job].isAssigned = true;
+                        break;
+                    }
+                }
+            } else {
+                const target = Game.getObjectById(creep.memory.pickup.target);
+                if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
+                    creep.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}});
+                }else if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_ENERGY){
+                    delete creep.room.memory.pickups[creep.memory.pickup.job];
+                    delete creep.memory.pickup;
+                }
+            }
         }
 	}
 };

@@ -93,12 +93,12 @@ Creep.prototype.energyToStructure = function(){
 // changes the state to work depending on the carry energy
 Creep.prototype.switchWorkState = function(){
     // if creep is bringing energy to the spawn but has no energy left
-    if (this.memory.state == true && this.carry.energy == 0) {
+    if (this.memory.state === true && this.carry.energy === 0) {
         // switch state
         this.memory.state = false;
     }
     // if creep is harvesting energy but is full
-    else if (this.memory.state == false && this.carry.energy == this.carryCapacity) {
+    else if (this.memory.state === false && this.carry.energy === this.carryCapacity) {
         // switch state
         this.memory.state = true;
     }
@@ -111,6 +111,5 @@ Creep.prototype.changeRoom = function(){
         // move to exit
         this.moveTo(this.pos.findClosestByRange(exit));
         // return the function to not do anything else
-        return;
     }
 }

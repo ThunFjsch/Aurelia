@@ -4,14 +4,12 @@ let containerMemmory = {
 }
 
 Room.prototype.createJobs = function(){
-    // let containers = this.room.find(STRUCTURE_CONTAINER);
-    console.log(Game.time % 1000)
     let currentTick = Game.time;
     if(this.memory.lastExecution === undefined){
         this.memory.lastExecution = currentTick;
-    } else if(this.memory.lastExecution + 5 < currentTick){
+    } else if(this.memory.lastExecution + 50 < currentTick){
         this.memory.lastExecution = currentTick;
-
+        
         let containers = this.find(FIND_STRUCTURES, {
             filter: (s) => s.structureType == STRUCTURE_CONTAINER
         });
@@ -27,7 +25,7 @@ Room.prototype.createJobs = function(){
                 }
                 else{
                     const pickUpRequests = Math.floor(container.store.getUsedCapacity(RESOURCE_ENERGY) / 100);
-                    console.log('requests: ' + pickUpRequests)
+                    
                     if(this.memory.pickups === undefined){
                         this.memory.pickups = {};
                         this.generatePickUp(container.id, pickUpRequests)
@@ -42,7 +40,9 @@ Room.prototype.createJobs = function(){
                             this.generatePickUp(container.id, pickUpRequests - currentRequests)
                         }
                     }
-                }
+
+                    console.log('requests: ' + pickUpRequests)
+                }   
             }
         }
     }
@@ -51,7 +51,7 @@ Room.prototype.createJobs = function(){
 Room.prototype.generatePickUp = function (target, pickUpRequests){
     for(let i = 0; i <= pickUpRequests; i++){
         let name = generateName('pickup');
-        this.memory.pickups[name] = {target: target, isAssigned: false}
+        this.memory.pickups[name] = {target: target, isAssigned: false, name: name}
     }
 }
 
