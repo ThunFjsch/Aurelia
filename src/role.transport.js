@@ -27,16 +27,26 @@ module.exports = {
             if(creep.memory.pickup === undefined){
                 for(let job in creep.room.memory.pickups){
                     if(!creep.room.memory.pickups[job].isAssigned){
-                        creep.memory.pickup = {target: creep.room.memory.pickups[job].target, job: creep.room.memory.pickups[job].name};
-                        creep.room.memory.pickups[job].isAssigned = true;
+                        creep.memory.pickup = {
+                            target: creep.room.memory.pickups[job].target, 
+                            job: creep.room.memory.pickups[job].name
+                        };
+                        creep.room.memory.pickups[job] = {
+                            isAssigned: true,
+                            assignee: creep.name
+                        }
                         break;
                     }
                 }
-            } else {
+            } else if(creep.memory.pickup.target === undefined){
+                delete creep.memory.pickup;
+            }
+            else {
                 const target = Game.getObjectById(creep.memory.pickup.target);
                 if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
                     creep.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}});
                 }else if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_ENERGY){
+                    console.log('Err: Job was outdated');
                     delete creep.room.memory.pickups[creep.memory.pickup.job];
                     delete creep.memory.pickup;
                 }
