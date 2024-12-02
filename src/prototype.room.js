@@ -10,22 +10,93 @@ Room.prototype.createJobs = function(){
     } else if(this.memory.lastExecution + 50 < currentTick){
         this.memory.lastExecution = currentTick;
  
-        let containers = this.find(FIND_STRUCTURES, {
+        const containers = this.find(FIND_STRUCTURES, {
             filter: (s) => s.structureType == STRUCTURE_CONTAINER
         });
-        let droppedEnergy = this.find(FIND_DROPPED_RESOURCES, {
+        const droppedEnergy = this.find(FIND_DROPPED_RESOURCES, {
             filter: (e) => e.resourceType === RESOURCE_ENERGY
         });
+        
+        // creates new pick up requests
         if(droppedEnergy != undefined){
             for(let index in droppedEnergy){
                 let drop = droppedEnergy[index];
-                console.log('generated requests for dropped energy');
                 this.generateDeletePickUpRequest(drop.amount, drop.id)
             }
         }
         if(containers != undefined){
             this.generateContainerPickUps(containers);
         }
+
+        /*
+        const workerCreeps = this.find(FIND_MY_CREEPS, {
+            filter: (c) => (c.memory.role === 'builder' || 
+                           c.memory.role === 'upgrader' || 
+                           c.memory.role === 'maintainer' || 
+                           c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 50
+        });
+        const extensions = this.find(FIND_MY_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_EXTENSION 
+        });
+        // const extensionsFilled = this.find(FIND_MY_STRUCTURES, {
+        //     filter: (s) => s.structureType = STRUCTURE_EXTENSION
+        // })
+
+        
+        // creates drop off requests
+        if(workerCreeps != undefined){
+            if(this.memory.dropOffs === undefined) {
+                this.memory.dropOffs = {};
+            } else{
+                for(let index in workerCreeps){
+                    const creep = workerCreeps[index];
+                    if(this.memory.dropOffs[creep.name] != undefined){
+                        break;
+                    } else{
+                        this.generateDropOff(creep.id);
+                    }
+                }
+            }
+        }
+        // console.log(extensionsFilled)
+        // if(extensionsFilled != undefined){
+        //     for(let index in extensionsFilled){
+        //         const extension = extensionsFilled[index];
+                
+                
+        //         for(let dropOff in this.memory.dropOffs){
+        //             let currentdropOff = this.memory.dropOffs[dropOff];
+                    
+        //             console.log(currentdropOff)
+        //             if(currentdropOff.target === extension.id){
+        //                 delete this.memory.dropOffs[dropOff];
+        //             }
+        //         }
+        //     }
+        // }
+        if(extensions != undefined){
+            for(let index in extensions){
+                const extension = extensions[index];
+                let hasJob = false;
+
+                //console.log(_.find(extensions['target', extension.id]))
+                for(let dropOff in this.memory.dropOffs){
+                    let currentdropOff = this.memory.dropOffs[dropOff];
+                    //console.log(currentdropOff.target == extension.id)
+                    if(currentdropOff.target === extension.id){
+                        console.log('foo');
+                        hasJob = true
+                        break;
+                    }
+                }
+                    
+                if(hasJob){
+                    break;
+                } else{
+                this.generateDropOff(extension.id);
+                }
+            }
+        }*/
     }
 }
 
@@ -53,6 +124,7 @@ Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId
     // Each transport can carry 100E so for each 100E one pickUp requests gets generated
     const pickUpRequests = this.calculatePickUpRequests(resourceCapacity);
             
+
     // if there are no pickUps, create the object and generate jobs 
     if(this.memory.pickups === undefined){
         this.memory.pickups = {};
@@ -60,17 +132,15 @@ Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId
     } 
     // Create and delete container jobs
     else {
-        let currentPickUpRequests = this.getCurrentContainerPickUps(targetId);
-
+        let currentPickUpRequests = this.getCurrentPickUps(targetId);
         // if current Requests are not enough create new ones
         if(currentPickUpRequests < pickUpRequests){
-            console.log('new job amount: ' + (pickUpRequests - currentPickUpRequests))
-            this.generatePickUp(targetId, (pickUpRequests - currentPickUpRequests))
-        } 
+            this.generatePickUp(targetId, (pickUpRequests - currentPickUpRequests));
+        }
         // delete outdated jobs
-        else if(currentPickUpRequests > pickUpRequests){
+        if(currentPickUpRequests > pickUpRequests){
+            console.log('delete entries')
             let entriesToDelete = currentPickUpRequests - pickUpRequests;
-            console.log('Deleted ' + entriesToDelete + ' entries');
             for(let pickUp in this.memory.pickups){
                 if(entriesToDelete != 0 && this.memory.pickups[pickUp].assignee != true){
                     delete this.memory.pickups[pickUp];
@@ -90,7 +160,12 @@ Room.prototype.generatePickUp = function (target, pickUpRequests){
     }
 }
 
-Room.prototype.getCurrentContainerPickUps = function(containerId) {
+Room.prototype.generateDropOff = function (target){
+    let name = generateName('dropOff');
+    this.memory.dropOffs[name] = {target: target, isAssigned: false, name: name, assignee: undefined }
+}
+
+Room.prototype.getCurrentPickUps = function(targetId) {
     let currentRequests = 0;
     for(let pickUp in this.memory.pickups){
         let currentPickUp = this.memory.pickups[pickUp];
@@ -105,7 +180,7 @@ Room.prototype.getCurrentContainerPickUps = function(containerId) {
         }
         
         // current job has container id, add to the requests
-        if(currentPickUp.target === containerId){
+        if(currentPickUp.target === targetId){
             currentRequests++;
         }
     }
@@ -113,7 +188,8 @@ Room.prototype.getCurrentContainerPickUps = function(containerId) {
 }
 
 Room.prototype.calculatePickUpRequests = function(ResourceAmount){
-    Math.floor(ResourceAmount / 100)
+    // TODO: change the static number 100 by the avg transport capacity or so
+    return Math.floor(ResourceAmount / 100)
 }
 
 function generateName(jobName){

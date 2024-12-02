@@ -48,7 +48,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
         // if there are still miners or enough energy in Storage left
         if (numberOfCreeps['miner'] > 0) {
             // create a transporter
-            name = this.createTransporter(150, 'transporter');
+            name = this.createTransporter(maxEnergy, 'transporter');
         }
     }
     else {
