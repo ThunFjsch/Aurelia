@@ -3,12 +3,12 @@ module.exports = {
     run: function(creep) {
         creep.switchWorkState();
         
-        if (creep.memory.state) { 
-            if(creep.room.name == creep.memory.home){
-                creep.energyToStructure(creep);
+        if (creep.memory.state) {
+            if(creep.room.name === creep.memory.home){
+                creep.getDropOff();
             } else {
                 var exit = creep.room.findExitTo(creep.memory.home);
-                creep.moveTo(creep.pos.findClosestByPath(exit));
+                creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
         // if creep is supposed to harvest energy from source

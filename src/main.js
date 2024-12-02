@@ -18,7 +18,9 @@ module.exports.loop = function () {
         }
         
         for(let room in Memory.rooms){
-            Game.rooms[room].createJobs();
+            if(Game.rooms[room] != undefined){
+                Game.rooms[room].createJobs();
+            }
         }
 
         // find all towers

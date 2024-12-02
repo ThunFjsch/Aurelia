@@ -20,6 +20,37 @@ Creep.prototype.runRole = function(){
     }
 }
 
+Creep.prototype.getDropOff = function(){
+    if(this.memory.dropOff === undefined){
+        for(let job in this.room.memory.dropOffs){
+            if(!this.room.memory.dropOffs[job].isAssigned){
+                this.memory.dropOff = {
+                    target: this.room.memory.dropOffs[job].target, 
+                    job: this.room.memory.dropOffs[job].name
+                };
+                this.room.memory.dropOffs[job] = {
+                    isAssigned: true,
+                    assignee: this.name
+                }
+                break;
+            }
+        }
+    } else if(this.memory.dropOff.target === undefined){
+        delete this.memory.dropOffs;
+    } else if(this.room.memory.dropOffs[this.memory.dropOff.target]){
+        delete this.memory.dropOff;
+        delete this.room.memory.dropOffs[this.memory.dropOff.job];
+    } else {
+        const target = Game.getObjectById(this.memory.dropOff.target);
+        if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
+            this.moveTo(target, {visualizePathStyle: {stroke: '#42f55a'}});
+        } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_RESOURCES || ERR_INVALID_TARGET){
+            delete this.room.memory.dropOffs[this.memory.dropOff.job];
+            delete this.memory.dropOff;
+        }
+    }
+}
+
 Creep.prototype.getEnergy = function(canMine){
     // find closest container with min 400 E
     let container = this.pos.findClosestByPath(FIND_STRUCTURES, {

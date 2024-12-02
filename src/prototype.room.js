@@ -7,7 +7,7 @@ Room.prototype.createJobs = function(){
     let currentTick = Game.time;
     if(this.memory.lastExecution === undefined){
         this.memory.lastExecution = currentTick;
-    } else if(this.memory.lastExecution + 50 < currentTick){
+    } else if(this.memory.lastExecution + 5 < currentTick){
         this.memory.lastExecution = currentTick;
  
         const containers = this.find(FIND_STRUCTURES, {
@@ -27,76 +27,38 @@ Room.prototype.createJobs = function(){
         if(containers != undefined){
             this.generateContainerPickUps(containers);
         }
-
-        /*
+        
+        // creates drop off requests
+        const extensions = this.find(FIND_MY_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_EXTENSION
+        });
+        if(extensions != undefined){
+            this.manageDropOffs(extensions);
+        }
+        
         const workerCreeps = this.find(FIND_MY_CREEPS, {
             filter: (c) => (c.memory.role === 'builder' || 
                            c.memory.role === 'upgrader' || 
                            c.memory.role === 'maintainer' || 
-                           c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 50
+                           c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20
         });
-        const extensions = this.find(FIND_MY_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_EXTENSION 
-        });
-        // const extensionsFilled = this.find(FIND_MY_STRUCTURES, {
-        //     filter: (s) => s.structureType = STRUCTURE_EXTENSION
-        // })
-
         
-        // creates drop off requests
         if(workerCreeps != undefined){
-            if(this.memory.dropOffs === undefined) {
-                this.memory.dropOffs = {};
-            } else{
-                for(let index in workerCreeps){
-                    const creep = workerCreeps[index];
-                    if(this.memory.dropOffs[creep.name] != undefined){
-                        break;
-                    } else{
-                        this.generateDropOff(creep.id);
-                    }
-                }
-            }
+            this.manageDropOffs(workerCreeps);
         }
-        // console.log(extensionsFilled)
-        // if(extensionsFilled != undefined){
-        //     for(let index in extensionsFilled){
-        //         const extension = extensionsFilled[index];
-                
-                
-        //         for(let dropOff in this.memory.dropOffs){
-        //             let currentdropOff = this.memory.dropOffs[dropOff];
-                    
-        //             console.log(currentdropOff)
-        //             if(currentdropOff.target === extension.id){
-        //                 delete this.memory.dropOffs[dropOff];
-        //             }
-        //         }
-        //     }
-        // }
-        if(extensions != undefined){
-            for(let index in extensions){
-                const extension = extensions[index];
-                let hasJob = false;
-
-                //console.log(_.find(extensions['target', extension.id]))
-                for(let dropOff in this.memory.dropOffs){
-                    let currentdropOff = this.memory.dropOffs[dropOff];
-                    //console.log(currentdropOff.target == extension.id)
-                    if(currentdropOff.target === extension.id){
-                        console.log('foo');
-                        hasJob = true
-                        break;
-                    }
-                }
-                    
-                if(hasJob){
-                    break;
-                } else{
-                this.generateDropOff(extension.id);
-                }
-            }
-        }*/
+        const roomSpawns = this.find(FIND_MY_SPAWNS, {
+            filter: (s) => s.store.getCapacity(RESOURCE_ENERGY)
+        });
+        if(roomSpawns != undefined){
+            this.manageDropOffs(roomSpawns);
+        }
+        
+        const towers = this.find(FIND_MY_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_TOWER
+        });
+        if(towers != undefined){
+            this.manageDropOffs(towers);
+        }
     }
 }
 
@@ -156,13 +118,40 @@ Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId
 Room.prototype.generatePickUp = function (target, pickUpRequests){
     for(let i = 0; i <= pickUpRequests; i++){
         let name = generateName('pickup');
-        this.memory.pickups[name] = {target: target, isAssigned: false, name: name, assignee: undefined }
+        this.memory.pickups[name] = {target: target, isAssigned: false, name: name, assignee: undefined };
     }
+}
+
+Room.prototype.manageDropOffs = function(dropOffTargets){
+    if(this.memory.dropOffs === undefined) {
+        this.memory.dropOffs = {};
+    } else{
+        for(let index in dropOffTargets){
+                    const target = dropOffTargets[index];
+                    let hasJob = false;
+                    if(target.store.getUsedCapacity(RESOURCE_ENERGY) < 50){
+                        for(let dropOff in this.memory.dropOffs){
+                            let currentdropOff = this.memory.dropOffs[dropOff];
+                            if(currentdropOff.target === target.id){
+                                hasJob = true
+                                break;
+                            } 
+                        }
+                        if(hasJob){
+                            break;
+                        } else{
+                            this.generateDropOff(target.id);
+                        }
+                    }
+                }
+            }
 }
 
 Room.prototype.generateDropOff = function (target){
     let name = generateName('dropOff');
-    this.memory.dropOffs[name] = {target: target, isAssigned: false, name: name, assignee: undefined }
+    if(target != undefined){
+        this.memory.dropOffs[name] = {target: target, isAssigned: false, name: name, assignee: undefined };
+    }
 }
 
 Room.prototype.getCurrentPickUps = function(targetId) {

@@ -64,7 +64,9 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
             allMiners.push(foo)
             
         }
-        if(sources.length == 2){
+        
+        
+        if(sources.length === 2){
             if(allMiners[0].length < allMiners[1].length){
                 sourceId = sources[0].id;
                 minerCount = allMiners[0].length;
