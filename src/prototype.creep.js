@@ -29,6 +29,7 @@ Creep.prototype.getDropOff = function(){
                     job: this.room.memory.dropOffs[job].name
                 };
                 this.room.memory.dropOffs[job] = {
+                    target: this.room.memory.dropOffs[job].target,
                     isAssigned: true,
                     assignee: this.name
                 }
@@ -43,11 +44,11 @@ Creep.prototype.getDropOff = function(){
     } else {
         const target = Game.getObjectById(this.memory.dropOff.target);
         if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
-            this.moveTo(target, {visualizePathStyle: {stroke: '#42f55a'}});
+            this.moveTo(target, {visualizePathStyle: {stroke: '#FFC0CB'}});
         } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_RESOURCES || ERR_INVALID_TARGET){
             delete this.room.memory.dropOffs[this.memory.dropOff.job];
             delete this.memory.dropOff;
-        }
+        } 
     }
 }
 

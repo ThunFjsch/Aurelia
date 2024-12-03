@@ -16,6 +16,7 @@ module.exports = {
                             job: creep.room.memory.pickups[job].name
                         };
                         creep.room.memory.pickups[job] = {
+                            target: creep.room.memory.pickups[job].target,
                             isAssigned: true,
                             assignee: creep.name
                         }

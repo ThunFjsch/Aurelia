@@ -29,6 +29,13 @@ Room.prototype.createJobs = function(){
         }
         
         // creates drop off requests
+        const towers = this.find(FIND_MY_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_TOWER
+        });
+        if(towers != undefined){
+            this.manageDropOffs(towers);
+        }
+        
         const extensions = this.find(FIND_MY_STRUCTURES, {
             filter: (s) => s.structureType === STRUCTURE_EXTENSION
         });
@@ -51,13 +58,6 @@ Room.prototype.createJobs = function(){
         });
         if(roomSpawns != undefined){
             this.manageDropOffs(roomSpawns);
-        }
-        
-        const towers = this.find(FIND_MY_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_TOWER
-        });
-        if(towers != undefined){
-            this.manageDropOffs(towers);
         }
     }
 }
@@ -85,7 +85,6 @@ Room.prototype.generateContainerPickUps = function(containers){
 Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId){
     // Each transport can carry 100E so for each 100E one pickUp requests gets generated
     const pickUpRequests = this.calculatePickUpRequests(resourceCapacity);
-            
 
     // if there are no pickUps, create the object and generate jobs 
     if(this.memory.pickups === undefined){
@@ -115,45 +114,6 @@ Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId
     }
 }
 
-Room.prototype.generatePickUp = function (target, pickUpRequests){
-    for(let i = 0; i <= pickUpRequests; i++){
-        let name = generateName('pickup');
-        this.memory.pickups[name] = {target: target, isAssigned: false, name: name, assignee: undefined };
-    }
-}
-
-Room.prototype.manageDropOffs = function(dropOffTargets){
-    if(this.memory.dropOffs === undefined) {
-        this.memory.dropOffs = {};
-    } else{
-        for(let index in dropOffTargets){
-                    const target = dropOffTargets[index];
-                    let hasJob = false;
-                    if(target.store.getUsedCapacity(RESOURCE_ENERGY) < 50){
-                        for(let dropOff in this.memory.dropOffs){
-                            let currentdropOff = this.memory.dropOffs[dropOff];
-                            if(currentdropOff.target === target.id){
-                                hasJob = true
-                                break;
-                            } 
-                        }
-                        if(hasJob){
-                            break;
-                        } else{
-                            this.generateDropOff(target.id);
-                        }
-                    }
-                }
-            }
-}
-
-Room.prototype.generateDropOff = function (target){
-    let name = generateName('dropOff');
-    if(target != undefined){
-        this.memory.dropOffs[name] = {target: target, isAssigned: false, name: name, assignee: undefined };
-    }
-}
-
 Room.prototype.getCurrentPickUps = function(targetId) {
     let currentRequests = 0;
     for(let pickUp in this.memory.pickups){
@@ -180,6 +140,47 @@ Room.prototype.calculatePickUpRequests = function(ResourceAmount){
     // TODO: change the static number 100 by the avg transport capacity or so
     return Math.floor(ResourceAmount / 100)
 }
+
+Room.prototype.generatePickUp = function (target, pickUpRequests){
+    for(let i = 0; i <= pickUpRequests; i++){
+        let name = generateName('pickup');
+        this.memory.pickups[name] = {target: target, isAssigned: false, name: name, assignee: undefined };
+    }
+}
+
+Room.prototype.manageDropOffs = function(dropOffTargets){
+    if(this.memory.dropOffs === undefined) {
+        this.memory.dropOffs = {};
+    } else{
+        for(let index in dropOffTargets){
+                    const target = dropOffTargets[index];
+                    let hasJob = false;
+                    if(target.store.getUsedCapacity(RESOURCE_ENERGY) < target.store.getCapacity(RESOURCE_ENERGY)){
+                        for(let dropOff in this.memory.dropOffs){
+                            let currentdropOff = this.memory.dropOffs[dropOff];
+                            if(currentdropOff.target === target.id){
+                                hasJob = true
+                                break;
+                            } 
+                        }
+                        if(hasJob){
+                            break;
+                        } else{
+                            this.generateDropOff(target.id);
+                        }
+                    }
+                }
+            }
+}
+
+Room.prototype.generateDropOff = function (target){
+    let name = generateName('dropOff');
+    if(target != undefined){
+        this.memory.dropOffs[name] = {target: target, isAssigned: false, name: name, assignee: undefined };
+    }
+}
+
+
 
 function generateName(jobName){
     return jobName + '_' + Math.random().toString(36).slice(2, 7).toString();
