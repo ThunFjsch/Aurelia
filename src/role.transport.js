@@ -25,16 +25,14 @@ module.exports = {
                 }
             } else if(creep.memory.pickup.target === undefined){
                 delete creep.memory.pickup;
-            } else if(creep.room.memory.pickups[creep.memory.pickup.target]){
+            } else if(creep.room.memory.pickups[creep.memory.pickup.job] === undefined){
                 delete creep.memory.pickup;
-                delete creep.room.memory.pickups[creep.memory.pickup.job];
             } else {
                 const target = Game.getObjectById(creep.memory.pickup.target);
                 if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE || creep.pickup(target) === ERR_NOT_IN_RANGE){
                     creep.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}});
-                }else if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_ENERGY || ERR_INVALID_TARGET){
+                }else if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_ENERGY){
                     //console.log('Err: Job was outdated');
-                    delete creep.room.memory.pickups[creep.memory.pickup.job];
                     delete creep.memory.pickup;
                 }
             }

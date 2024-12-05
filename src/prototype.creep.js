@@ -31,7 +31,8 @@ Creep.prototype.getDropOff = function(){
                 this.room.memory.dropOffs[job] = {
                     target: this.room.memory.dropOffs[job].target,
                     isAssigned: true,
-                    assignee: this.name
+                    assignee: this.name,
+                    name: this.room.memory.dropOffs[job].name
                 }
                 break;
             }
@@ -42,13 +43,17 @@ Creep.prototype.getDropOff = function(){
         delete this.memory.dropOff;
         delete this.room.memory.dropOffs[this.memory.dropOff.job];
     } else {
+        
         const target = Game.getObjectById(this.memory.dropOff.target);
+        
         if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
-            this.moveTo(target, {visualizePathStyle: {stroke: '#FFC0CB'}});
-        } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_RESOURCES || ERR_INVALID_TARGET){
-            delete this.room.memory.dropOffs[this.memory.dropOff.job];
+            this.moveTo(target, {visualizePathStyle: {stroke: '#c0ffc3'}});
+        } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_RESOURCES){
             delete this.memory.dropOff;
-        } 
+        } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_INVALID_TARGET || ERR_FULL){
+            delete this.memory.dropOff;
+            //delete this.room.memory.dropOffs[this.memory.dropOff.job];
+        }
     }
 }
 
@@ -128,6 +133,7 @@ Creep.prototype.switchWorkState = function(){
     if (this.memory.state === true && this.carry.energy === 0) {
         // switch state
         this.memory.state = false;
+        delete this.memory.dropOff;
     }
     // if creep is harvesting energy but is full
     else if (this.memory.state === false && this.carry.energy === this.carryCapacity) {

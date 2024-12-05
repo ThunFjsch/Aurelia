@@ -19,7 +19,7 @@ module.exports.loop = function () {
         
         for(let room in Memory.rooms){
             if(Game.rooms[room] != undefined){
-                Game.rooms[room].createJobs();
+                Game.rooms[room].roomManager();
             }
         }
 

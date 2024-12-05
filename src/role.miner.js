@@ -16,32 +16,32 @@ module.exports = {
                     }
                 }
             } else {
-                // find container next to source
-                let container = source.pos.findInRange(FIND_STRUCTURES, 1, {
-                    filter: s => s.structureType == STRUCTURE_CONTAINER
-                })[0];
-                if(container === undefined){
-                    // try to harvest energy, if the source is not in range
-                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                     // move towards it
-                    creep.moveTo(source);
-                }
-            } else{
-                // if creep is on top of the container
-                if (creep.pos.isEqualTo(container.pos)) {
-                    // harvest source
-                    creep.harvest(source);
-                }
-                // if creep is not on top of the container
-                else {
-                    // move towards it
-                    creep.moveTo(container);
+                if(source != undefined){
+                    // find container next to source
+                    let container = source.pos.findInRange(FIND_STRUCTURES, 1, {
+                        filter: s => s.structureType == STRUCTURE_CONTAINER
+                    })[0];
+                    if(container === undefined){
+                            // try to harvest energy, if the source is not in range
+                        if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                             // move towards it
+                            creep.moveTo(source);
+                        }
+                    } else{
+                        // if creep is on top of the container
+                        if (creep.pos.isEqualTo(container.pos)) {
+                            // harvest source
+                            creep.harvest(source);
+                        }
+                        // if creep is not on top of the container
+                        else {
+                            // move towards it
+                            creep.moveTo(container);
+                        }
+                    }
                 }
             }
-            }
-            
         }
        
     }
 };
-//5bbcafd19099fc012e63b3bf
