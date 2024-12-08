@@ -42,36 +42,6 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     let maxEnergy = room.energyAvailable;    
     let name = undefined;
     
-    // if no harvesters are left AND either no miners or no lorries are left
-    //  create a backup creep
-    if (numberOfCreeps['transporter'] === 0) {
-        console.log('tock why')
-        // if there are still miners or enough energy in Storage left
-        if (numberOfCreeps['miner'] > 0) {
-            // create a transporter
-            name = this.createTransporter(maxEnergy, 'transporter');
-        }
-    } else {
-        console.log('tock')
-        let miners = this.room.find(FIND_MY_CREEPS, {
-        filter: (c) => c.memory.role === 'miner'
-        });
-        if(this.room.memory.remoteMining != undefined){
-            for(let i = 0; i < this.room.memory.remoteMining.sources.length; i++){
-                console.log('spawn miner?')
-                workPartAmount = this.room.getSpecificBodyPartCountForSource(miners, 'miner', WORK, this.room.memory.remoteMining.sources[i]);
-                name = this.spawnMiner(
-                    this.room.memory.remoteMining.sources, 
-                    workPartAmount, 
-                    this.name, 
-                    miners,
-                    1);
-                console.log(name)
-            }
-        }
-    }
-    
-    
     // if none of the above caused a spawn command check for other roles
     if (name == undefined) {
         for (let role of listOfRoles) {
@@ -89,10 +59,10 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
             // if no claim order was found, check other roles
             else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
                 if (role == 'transporter') {
-                    name = this.createTransporter(maxEnergy, role);
+                    name = this.createTransporter(maxEnergy, role, this.room.name);
                 }
                 else if(role != 'miner'){
-                    name = this.createCustomCreep(maxEnergy, role);
+                    name = this.createCustomCreep(role, this.room.name);
                 }
                 break;
             }
@@ -134,7 +104,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
             }
         }
     }*/
-
+    
     // print name to console if spawning was a success
     if (name != undefined && _.isString(name)) {
         console.log(this.name + " spawned new creep: " + name + " (" + Game.creeps[name].memory.role + ")");
@@ -147,7 +117,8 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     }
 }
 
-StructureSpawn.prototype.createCustomCreep = function (energy, roleName) {
+StructureSpawn.prototype.createCustomCreep = function (roleName, target) {
+    let energy = this.room.energyAvailable;
     // create a balanced body as big as possible with the given energy
     var numberOfParts = Math.floor(energy / 200);
     // make sure the creep is not too big (more than 50 parts)
@@ -163,61 +134,29 @@ StructureSpawn.prototype.createCustomCreep = function (energy, roleName) {
         body.push(MOVE);
     }
     // create creep with the created body and the given role
-    return this.spawnCreep(body, generateName(roleName), {memory: {role: roleName, state: false, target: this.room.name}});
+    return this.spawnCreep(body, generateName(roleName), {memory: {role: roleName, state: false, target: target, home: this.room.name}});
 };
 
-StructureSpawn.prototype.spawnMiner = function(source, currentWorkParts, target, miners, moveParts){
-    const miningWorkParts = Math.floor((source.energyCapacity / 300) / 2);
-    let workersAssignToSource = 0;
-       
-    for(let i = 0; i < miners.length; i++){
-       if(miners[i].memory.sourceId === source.id){
-           workersAssignToSource++;
-       }
-    }
-    
-    console.log('fpp '+ workersAssignToSource)
-    if(workersAssignToSource < source.avialableSpots && currentWorkparts < miningWorkParts){
-        console.log('in spawn miner')
-        return this.createMiner(source.id, 'miner', target, miningWorkParts - currentWorkParts, moveParts); 
-    }
-}
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createMiner = function (sourceId, roleName, target, workPartsNeeded, movePartsNeeded) {
-    const extensions = this.room.find(FIND_STRUCTURES, {
-        filter: (s) => s.structureType === STRUCTURE_EXTENSION
-    });
+StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningWorkParts, moveParts, sourceContainer){
     var body = [];
-    let energy = 0;
-    
-    if(_.isEmpty(extensions) === false){
-        energy = this.room.energyCapacityAvailable;
-    } else{
-        energy = this.room.energyAvailable;
-    }
-    
-    
-    
-    
-     // create a balanced body as big as possible with the given energy
-    var numberOfParts = Math.floor((energy - BODYPART_COST[MOVE]) / BODYPART_COST[WORK] * workPartsNeeded);
-    // make sure the creep is not too big (more than 50 parts)
-    
-    if(numberOfParts === 0){
-        return ERR_INVALID_ARGS;
-    }
-    
-    for (let i = 0; i < numberOfParts; i++) {
-        body.push(WORK);
-        if(i === workPartsNeeded){
-            break;
+        // create a balanced body as big as possible with the given energy
+        var numberOfParts = Math.floor((energy - BODYPART_COST[MOVE]) / BODYPART_COST[WORK]);
+        // make sure the creep is not too big (more than 50 parts)
+        if(numberOfParts === 0){
+            return ERR_INVALID_ARGS;
         }
-    }
-    
-    body.push(MOVE);
-    
-    return this.spawnCreep(body, generateName(roleName), {memory: { role: roleName, sourceId: sourceId, target: target }});
+        for (let i = 0; i < numberOfParts; i++) {
+            if(miningWorkParts <= i){
+                break;
+            }
+            body.push(WORK);
+        }
+        body.push(MOVE);
+        
+        if(body.length === 1){
+            return ERR_NOT_ENOUGH_ENERGY;
+        }
+        return this.spawnCreep(body, generateName('miner'), {memory: { role: 'miner', sourceId: sourceId, target: target, containerPos: sourceContainer }});
 };
 
 StructureSpawn.prototype.createAttacker = function (energy, roleName, home, target) {
@@ -287,20 +226,33 @@ StructureSpawn.prototype.createRangedFighter = function (energy, roleName, home,
 
 
 // create a new function for StructureSpawn
-StructureSpawn.prototype.createTransporter = function (energy, roleName) {
+StructureSpawn.prototype.createTransporter = function (energy, roleName, target) {
+    console.log('spawning transport')
     // create a body with twice as many CARRY as MOVE parts
     var numberOfParts = Math.floor(energy / 150);
     // make sure the creep is not too big (more than 50 parts)
     numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
     var body = [];
-    for (let i = 0; i < numberOfParts * 2; i++) {
+    for (let i = 0; i < numberOfParts; i++) {
         body.push(CARRY);
     }
     for (let i = 0; i < numberOfParts; i++) {
         body.push(MOVE);
     }
     // create creep with the created body and the role 'lorry'
-    return this.spawnCreep(body, generateName(roleName), {memory: { role: roleName, state: false }});
+    if(!_.isEmpty(body)){
+        return this.spawnCreep(
+            body, 
+            generateName(roleName), 
+            {memory: { 
+                role: roleName, 
+                state: false, 
+                target: target,
+                 home: this.room.name }
+            });
+    } else{
+        return ERR_NOT_ENOUGH_ENERGY
+    }
 };
 
 StructureSpawn.prototype.createClaimer = function (target, roleName) {

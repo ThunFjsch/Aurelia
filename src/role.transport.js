@@ -3,38 +3,24 @@ module.exports = {
     run: function(creep) {
         creep.switchWorkState();
         // if creep is supposed to transfer energy to the spawn
+        
         if (creep.memory.state) {
-            creep.getDropOff();
+            if(creep.room.name === creep.memory.home){
+                creep.getDropOff();
+            } else {
+               // delete creep.memory.dropOff;
+                var exit = creep.room.findExitTo(creep.memory.home);
+                creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#ffffff'}});
+            }
         }
         // if creep is supposed to harvest energy from source
         else {
-            if(creep.memory.pickup === undefined){
-                for(let job in creep.room.memory.pickups){
-                    if(!creep.room.memory.pickups[job].isAssigned){
-                        creep.memory.pickup = {
-                            target: creep.room.memory.pickups[job].target, 
-                            job: creep.room.memory.pickups[job].name
-                        };
-                        creep.room.memory.pickups[job] = {
-                            target: creep.room.memory.pickups[job].target,
-                            isAssigned: true,
-                            assignee: creep.name
-                        }
-                        break;
-                    }
-                }
-            } else if(creep.memory.pickup.target === undefined){
-                delete creep.memory.pickup;
-            } else if(creep.room.memory.pickups[creep.memory.pickup.job] === undefined){
-                delete creep.memory.pickup;
+            if(creep.room.name === creep.memory.target){
+                creep.getPickUp();
             } else {
-                const target = Game.getObjectById(creep.memory.pickup.target);
-                if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE || creep.pickup(target) === ERR_NOT_IN_RANGE){
-                    creep.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}});
-                }else if(creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_ENERGY){
-                    //console.log('Err: Job was outdated');
-                    delete creep.memory.pickup;
-                }
+               // delete creep.memory.pickup;
+                var exit = creep.room.findExitTo(creep.memory.target);
+                creep.moveTo(creep.pos.findClosestByPath(exit));
             }
 	    }
     }

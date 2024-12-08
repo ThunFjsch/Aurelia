@@ -16,12 +16,6 @@ module.exports.loop = function () {
                 delete Memory.creeps[creep];
             }
         }
-        
-        for(let room in Memory.rooms){
-            if(Game.rooms[room] != undefined){
-                Game.rooms[room].roomManager();
-            }
-        }
 
         // find all towers
         var towers = _.filter(Game.structures, s => s.structureType == STRUCTURE_TOWER);
@@ -29,6 +23,12 @@ module.exports.loop = function () {
         for (let tower of towers) {
             // run tower logic
             tower.defend();
+        }
+        
+        for(let room in Memory.rooms){
+            if(Game.rooms[room] != undefined){
+                Game.rooms[room].roomManager();
+            }
         }
         
         for (let spawnName in Game.spawns) {

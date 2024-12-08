@@ -36,7 +36,7 @@ Room.prototype.jobManager = function(){
             filter: (c) => (c.memory.role === 'builder' || 
                            c.memory.role === 'upgrader' || 
                            c.memory.role === 'maintainer' || 
-                           c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20
+                           c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
         });
         if(workerCreeps != undefined){
             this.manageDropOffs(workerCreeps);

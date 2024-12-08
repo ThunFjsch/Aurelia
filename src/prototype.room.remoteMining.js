@@ -88,21 +88,5 @@ Room.prototype.remoteMining = function(){
             }
             this.memory.remoteMining.assignedToo = assignee.toString();
         }
-    } else if(this.memory.remoteMining.assignedToo != undefined){
-        console.log('foo')
-        const miningWorkParts = Math.floor((this.memory.remoteMining.sources[0].energyCapacity / 300) / 2);
-        const miners = this.find(FIND_MY_CREEPS, {
-            filter: (c) => c.memory.role = 'miner'
-        });
-        for(let i = 0; i < this.memory.remoteMining.sources.length; i++){
-            workPartAmount = getSpecificBodyPartCountForSource(miners, 'miner', WORK, source);
-            console.log('remote try to spawn miner');
-            Game.rooms[this.memory.remoteMining.assignedToo].find(FIND_MY_SPAWNS)[0].spawnMiner(
-                this.memory.remoteMining.sources, 
-                workPartAmount, 
-                this.name, 
-                miners,
-                Math.floor(source.pathCost / 5));
-        }
     }
 }

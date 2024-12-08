@@ -1,10 +1,8 @@
 var roles = {
-    harvester: require('role.harvester'),
     upgrader: require('role.upgrader'),
     builder: require('role.builder'),
     maintainer: require('role.maintenance'),
     wallRepairer: require('role.wallRepairer'),
-    longDistanceHarvester: require('role.longDistanceHarvester'),
     claimer: require('role.claimer'),
     miner: require('role.miner'),
     transporter: require('role.transport'),
@@ -53,6 +51,40 @@ Creep.prototype.getDropOff = function(){
         } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_INVALID_TARGET || ERR_FULL){
             delete this.memory.dropOff;
             //delete this.room.memory.dropOffs[this.memory.dropOff.job];
+        }
+    }
+}
+
+Creep.prototype.getPickUp = function(){
+   if(this.memory.pickup === undefined){
+        for(let job in this.room.memory.pickups){
+            if(!this.room.memory.pickups[job].isAssigned){
+                this.memory.pickup = {
+                    target: this.room.memory.pickups[job].target, 
+                        job: this.room.memory.pickups[job].name
+                    };
+                    this.room.memory.pickups[job] = {
+                        target: this.room.memory.pickups[job].target,
+                        isAssigned: true,
+                        assignee: this.name
+                    }
+                    break;
+                }
+            }
+    } else if(this.memory.pickup.target === undefined){
+        delete this.memory.pickup;
+    } /* else if(this.room.memory.pickups[this.memory.pickup.job] === undefined){
+        console.log(this.room.memory.pickups[this.memory.pickup.job])
+        console.log('job outdatd')
+        delete this.memory.pickup;
+    } */else {
+        const target = Game.getObjectById(this.memory.pickup.target);
+        if(this.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE || this.pickup(target) === ERR_NOT_IN_RANGE){
+            //console.log(this.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}}))
+            this.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}});
+        } else if(this.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_ENERGY || ERR_INVALID_TARGET){
+            //console.log('Err: Job was outdated');
+            delete this.memory.pickup;
         }
     }
 }
