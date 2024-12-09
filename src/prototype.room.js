@@ -21,16 +21,19 @@ Room.prototype.roomManager = function(){
 }
 
 Room.prototype.getSpecificBodyPartCountForSource = function(creeps, role, bodyPart, source){
-    const roleFilter = this.find(FIND_MY_CREEPS, {
-        filter: (c) => c.memory.role === role
-    });
+    const roleFilter = _.map(Game.creeps, function(c) {
+        if(c.memory.role === role){ return c}
+    })
+    
     let workPartAmount = 0;
-    for(let i = 0; i < creeps.length; i++){
-        const creepWorkParts = _.map(creeps[i].body, function(b) {return b.type === bodyPart });
-        if(creeps[i].memory.sourceId === source.id){
+    for(let i = 0; i < roleFilter.length; i++){
+        if(roleFilter[i] != undefined){
+            const creepWorkParts = _.map(roleFilter[i].body, function(b) {return b.type === bodyPart });
+            if(roleFilter[i].memory.sourceId === source.id){
             for(let i = 0; i < creepWorkParts.length; i++){
                 if(creepWorkParts[i]){
                     workPartAmount++;
+                    }
                 }
             }    
         }

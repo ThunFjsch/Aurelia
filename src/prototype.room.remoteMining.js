@@ -19,7 +19,6 @@ Room.prototype.remoteMining = function(){
                     miningSpots++;
                 }
             }
-            console.log(miningSpots)
             this.memory.remoteMining.sources[i].avialableSpots = miningSpots;
         }
     } else if(this.memory.remoteMining.isMined === true && this.memory.remoteMining.assignedToo === undefined){

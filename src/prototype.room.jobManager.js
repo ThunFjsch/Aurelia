@@ -25,13 +25,6 @@ Room.prototype.jobManager = function(){
             this.manageDropOffs(towers);
         }
         
-        const extensions = this.find(FIND_MY_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_EXTENSION
-        });
-        if(extensions != undefined){
-            this.manageDropOffs(extensions);
-        }
-        
         const workerCreeps = this.find(FIND_MY_CREEPS, {
             filter: (c) => (c.memory.role === 'builder' || 
                            c.memory.role === 'upgrader' || 
@@ -42,6 +35,13 @@ Room.prototype.jobManager = function(){
             this.manageDropOffs(workerCreeps);
         }
         
+        const extensions = this.find(FIND_MY_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_EXTENSION
+        });
+        if(extensions != undefined){
+            this.manageDropOffs(extensions);
+        }
+
         const roomSpawns = this.find(FIND_MY_SPAWNS, {
             filter: (s) => s.store.getCapacity(RESOURCE_ENERGY)
         });

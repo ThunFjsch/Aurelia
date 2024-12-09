@@ -58,10 +58,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
             
             // if no claim order was found, check other roles
             else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
-                if (role == 'transporter') {
-                    name = this.createTransporter(maxEnergy, role, this.room.name);
-                }
-                else if(role != 'miner'){
+                if(role != 'miner' && role != 'transporter'){
                     name = this.createCustomCreep(role, this.room.name);
                 }
                 break;
@@ -77,7 +74,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
         if(this.memory.attackRoom){
             numberOfAttacker[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
                     c.memory.role == 'fighter');
-            if (numberOfAttacker[this.memory.attackRoom] < 3) {
+            if (numberOfAttacker[this.memory.attackRoom] < 2) {
                 name = this.createAttacker(maxEnergy, 'fighter', this.room.name, this.memory.attackRoom);
             }
         }
@@ -88,7 +85,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
         if(this.memory.attackRoom){
             numberOfRangedFighter[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
                     c.memory.role == 'rangedFighter');
-            if (numberOfRangedFighter[this.memory.attackRoom] < 0) {
+            if (numberOfRangedFighter[this.memory.attackRoom] < 2) {
                 name = this.createRangedFighter(maxEnergy, 'rangedFighter', this.room.name, this.memory.attackRoom);
             }
         }
@@ -152,10 +149,10 @@ StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningW
             body.push(WORK);
         }
         body.push(MOVE);
-        
         if(body.length === 1){
             return ERR_NOT_ENOUGH_ENERGY;
         }
+        
         return this.spawnCreep(body, generateName('miner'), {memory: { role: 'miner', sourceId: sourceId, target: target, containerPos: sourceContainer }});
 };
 
@@ -226,8 +223,10 @@ StructureSpawn.prototype.createRangedFighter = function (energy, roleName, home,
 
 
 // create a new function for StructureSpawn
-StructureSpawn.prototype.createTransporter = function (energy, roleName, target) {
-    console.log('spawning transport')
+StructureSpawn.prototype.createTransporter = function (energy, roleName, target, home) {
+    if(home === undefined){
+        home = this.room.name;
+    }
     // create a body with twice as many CARRY as MOVE parts
     var numberOfParts = Math.floor(energy / 150);
     // make sure the creep is not too big (more than 50 parts)
@@ -248,7 +247,7 @@ StructureSpawn.prototype.createTransporter = function (energy, roleName, target)
                 role: roleName, 
                 state: false, 
                 target: target,
-                 home: this.room.name }
+                home: home }
             });
     } else{
         return ERR_NOT_ENOUGH_ENERGY
