@@ -13,6 +13,21 @@ module.exports = {
                 }
             } else {
                 if(source != undefined){
+                    const target = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE, {
+                        filter: (s) => s.id === source.id
+                    });
+                     //console.log(source)
+                     if(target === null){
+                         target === source
+                     }
+                    //console.log(creep.moveTo(source))
+                    if(target) {
+                        if(creep.harvest(target) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(target);
+                        }
+                    }
+
+                   
                     if(creep.harvest(source) === ERR_NOT_IN_RANGE) {
                         // move towards it
                         creep.moveTo(source);

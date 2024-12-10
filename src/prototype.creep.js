@@ -20,6 +20,11 @@ Creep.prototype.runRole = function(){
 
 Creep.prototype.getDropOff = function(){
     if(this.memory.dropOff === undefined){
+        console.log(Object.keys(this.room.memory.dropOffs).length)
+        for(let job in this.room.memory.dropOffs){
+            
+            console.log(this.room.memory.dropOffs)
+        }
         for(let job in this.room.memory.dropOffs){
             if(!this.room.memory.dropOffs[job].isAssigned){
                 this.memory.dropOff = {
@@ -44,6 +49,9 @@ Creep.prototype.getDropOff = function(){
         
         const target = Game.getObjectById(this.memory.dropOff.target);
         
+        if(this.transfer(target, RESOURCE_ENERGY) === OK){
+            delete this.room.memory.dropOffs[this.memory.dropOff.job];
+        }
         if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
             this.moveTo(target, {visualizePathStyle: {stroke: '#c0ffc3'}});
         } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_RESOURCES){

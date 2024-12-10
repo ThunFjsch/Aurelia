@@ -1,6 +1,9 @@
 module.exports = {
+    // TODO: Clean up this mess and make it usuable for fighter or do something similar. 
     // a function to run the logic for this role
     run: function(creep) {
+            console.log(creep.name)
+            
         // if in target room
         if (creep.room.name != creep.memory.target) {
             // find exit to target room
@@ -9,11 +12,19 @@ module.exports = {
             creep.moveTo(creep.pos.findClosestByRange(exit));
         }
         else {
-            // try to claim controller
-            if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                // move towards the controller
-                creep.moveTo(creep.room.controller);
+            let roomController =  creep.room.controller;
+            const temp = creep.room.lookForAtArea(LOOK_TERRAIN,roomController.pos.y-1,roomController.pos.x-1,roomController.pos.y+1,roomController.pos.x+1,true)
+            let foo = _.map(temp, function(t){ if(t.terrain != 'wall') return t});
+            let claimerSpot;
+            for(let i = 0; i < foo.length; i++){
+                if(foo[i] != undefined){
+                    claimerSpot = foo[i]
+                }
             }
+            if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(claimerSpot.x, claimerSpot.y,  {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+            creep.signController(creep.room.controller, 'Bob Bobbington')
         }
     }
 };

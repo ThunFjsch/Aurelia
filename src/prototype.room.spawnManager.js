@@ -1,25 +1,36 @@
 Room.prototype.spawnManager = function(){
     if(this.memory.pickups != undefined && this.memory.dropOffs != undefined){
         const spawns = this.find(FIND_MY_SPAWNS);
-        
-        if(this.memory.remoteMining.isMined === true && this.memory.remoteMining.assignedToo != undefined){            
-            const assignedSpawn = Game.rooms[this.memory.remoteMining.assignedToo].find(FIND_MY_SPAWNS)[0];
-            const energyAvailable = assignedSpawn.room.energyAvailable;
-
-            this.isMinerNeeded(assignedSpawn);
-            this.isTransportNeeded(assignedSpawn, energyAvailable);
-            this.remoteBuilderTransport(assignedSpawn, energyAvailable)
-            this.isBuilderNeeded(assignedSpawn);
-        } else if(!_.isEmpty(spawns)){
+        if(!_.isEmpty(spawns)){
+            
             for(let name in spawns){
                 let currentSpawn = spawns[name];
                 let spawnState;
                 spawnState = this.isMinerNeeded(currentSpawn);
-                if(spawnState != undefined){
-                    this.isTransportNeeded(currentSpawn, currentSpawn.room.energyAvailable)
+                
+                if(spawnState === undefined){
+                    spawnState = this.isTransportNeeded(currentSpawn, currentSpawn.room.energyAvailable)
                 }
-                if(spawnState != undefined){
+                if(spawnState === undefined){
                     this.isBuilderNeeded(currentSpawn);
+                }
+            }
+        } else if(this.memory.remoteMining.isMined === true && this.memory.remoteMining.assignedToo != undefined){            
+            const assignedSpawn = Game.rooms[this.memory.remoteMining.assignedToo].find(FIND_MY_SPAWNS)[0];
+            const hasMiners = !_.isEmpty(Game.rooms[this.memory.remoteMining.assignedToo].find(FIND_MY_CREEPS, {
+                 filter: (c) =>  c.memory.role === 'miner'
+            }));
+            if(hasMiners){
+                const energyAvailable = assignedSpawn.room.energyAvailable;
+                let spawnState = this.isMinerNeeded(assignedSpawn);
+                if(spawnState === undefined){
+                    this.isTransportNeeded(assignedSpawn, energyAvailable)
+                }
+                if(spawnState === undefined){
+                    this.isBuilderNeeded(assignedSpawn);
+                }
+                if(spawnState === undefined){
+                    this.remoteBuilderTransport(assignedSpawn, energyAvailable)
                 }
             }
         }
@@ -34,7 +45,6 @@ Room.prototype.isTransportNeeded = function(assignedSpawn, energyAvailable){
     let transporterAssigned = 0;
     for(let i = 0; i < foo.length; i++){
         if(foo[i]){
-            
             transporterAssigned++;
         }
     }
@@ -43,15 +53,16 @@ Room.prototype.isTransportNeeded = function(assignedSpawn, energyAvailable){
     }
 }
 
-Room.prototype.remoteBuilderTransport = function(){
-    let foo = _.map(Game.creeps, function(c){ return c.memory.role === 'transporter' && c.memory.target === this.name && c.memory.home === this.name})
+Room.prototype.remoteBuilderTransport = function(assignedSpawn, energyAvailable){
+    let roomName = this.name;
+    let foo = _.map(Game.creeps, function(c){ return c.memory.role === 'transporter' && c.memory.target === roomName && c.memory.home === roomName})
     let transporterAssigned = 0;
     for(let i = 0; i < foo.length; i++){
         if(foo[i]){
             transporterAssigned++;
         }
     }
-    let builderAssigned = numberOfBuilders();
+    let builderAssigned = numberOfBuilders(this.name);
     if(transporterAssigned < builderAssigned){
         console.log('transport builder')
         assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name, this.name);
@@ -75,14 +86,14 @@ Room.prototype.isBuilderNeeded = function(assignedSpawn){
     }
 
     /// builder
-    let builderAssigned = numberOfBuilders();
+    let builderAssigned = numberOfBuilders(this.name);
     if(builderAssigned < requiredBuilder){
         assignedSpawn.createCustomCreep('builder', this.name);
     }
 }
 
-function numberOfBuilders(){
-    let roomBuilders = _.map(Game.creeps, function(c){ return c.memory.role === 'builder' && c.memory.target === this.name})
+function numberOfBuilders(roomName){
+    let roomBuilders = _.map(Game.creeps, function(c){ return c.memory.role === 'builder' && c.memory.target === roomName})
     let builderAssigned = 0;
     for(let i = 0; i < roomBuilders.length; i++){
         if(roomBuilders[i]){
