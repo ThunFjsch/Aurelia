@@ -18,11 +18,15 @@ module.exports = {
             let claimerSpot;
             for(let i = 0; i < foo.length; i++){
                 if(foo[i] != undefined){
+                    
                     claimerSpot = foo[i]
                 }
             }
+
+            new RoomVisual(creep.room.name).line(claimerSpot.x, claimerSpot.y, creep.pos.x, creep.pos.y)
+            //JSON.stringify(new RoomPosition(23, 4, 'E47S3').findPathTo(11, 13), null, 2)
             if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(claimerSpot.x, claimerSpot.y,  {visualizePathStyle: {stroke: '#ffaa00'}});
+                creep.moveTo(claimerSpot.x, claimerSpot.y,  {visualizePathStyle: {stroke: '#ffaa00'}, ignoreDestructibleStructures: false, maxOps: 10000});
             }
             creep.signController(creep.room.controller, 'Bob Bobbington')
         }
