@@ -5,7 +5,7 @@ module.exports = {
         const structure = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES);
         
         if(target) {
-            console.log(target.pos.inRangeTo(creep.pos.x, creep.pos.y, 2, target, 2));
+            //console.log(target.pos.inRangeTo(creep.pos.x, creep.pos.y, 2, target, 2));
             if(creep.rangedAttack(target) == ERR_NOT_IN_RANGE) {
                 
                 creep.moveTo(target);

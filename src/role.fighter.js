@@ -9,11 +9,11 @@ module.exports = {
             }
         } else if(target == undefined && structure != undefined) {
             if(creep.attack(structure) == ERR_NOT_IN_RANGE){
-                creep.moveTo(structure, {visualizePathStyle: {stroke: '#ffffff'}})
+                creep.moveTo(structure, {visualizePathStyle: {stroke: '#ffffff'}, maxOps: 10000})
             }
         } else if(creep.room.name != creep.memory.attackRoom && structure == undefined){
                 var exit = creep.room.findExitTo(creep.memory.attackRoom);
-                creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#ffffff'}});
+                creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#ffffff'}, maxOps: 10000});
         } else {
             creep.moveTo(creep.room.controller);
         }

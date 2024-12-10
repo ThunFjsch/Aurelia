@@ -12,7 +12,7 @@ Room.prototype.roomManager = function(){
     let currentTick = Game.time;
     if(this.memory.lastExecution === undefined){
         this.memory.lastExecution = currentTick;
-    } else if(this.memory.lastExecution + 3 < currentTick){
+    } else if(this.memory.lastExecution + 10 < currentTick){
         this.memory.lastExecution = currentTick;
         this.jobManager();
         this.spawnManager();
@@ -30,12 +30,12 @@ Room.prototype.getSpecificBodyPartCountForSource = function(creeps, role, bodyPa
         if(roleFilter[i] != undefined){
             const creepWorkParts = _.map(roleFilter[i].body, function(b) {return b.type === bodyPart });
             if(roleFilter[i].memory.sourceId === source.id){
-            for(let i = 0; i < creepWorkParts.length; i++){
-                if(creepWorkParts[i]){
-                    workPartAmount++;
+                for(let i = 0; i < creepWorkParts.length; i++){
+                    if(creepWorkParts[i]){
+                        workPartAmount++;
                     }
-                }
-            }    
+                }    
+            }   
         }
     }
     return workPartAmount;

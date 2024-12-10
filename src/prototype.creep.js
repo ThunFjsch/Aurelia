@@ -20,11 +20,6 @@ Creep.prototype.runRole = function(){
 
 Creep.prototype.getDropOff = function(){
     if(this.memory.dropOff === undefined){
-        console.log(Object.keys(this.room.memory.dropOffs).length)
-        for(let job in this.room.memory.dropOffs){
-            
-            console.log(this.room.memory.dropOffs)
-        }
         for(let job in this.room.memory.dropOffs){
             if(!this.room.memory.dropOffs[job].isAssigned){
                 this.memory.dropOff = {

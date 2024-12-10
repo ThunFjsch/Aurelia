@@ -48,6 +48,8 @@ Room.prototype.isTransportNeeded = function(assignedSpawn, energyAvailable){
             transporterAssigned++;
         }
     }
+    //console.log(this.name)
+    //console.log(transporterAssigned < requiredTransports)
     if(transporterAssigned < requiredTransports){
         assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name);
     }
@@ -63,6 +65,7 @@ Room.prototype.remoteBuilderTransport = function(assignedSpawn, energyAvailable)
         }
     }
     let builderAssigned = numberOfBuilders(this.name);
+   // console.log(transporterAssigned < builderAssigned)
     if(transporterAssigned < builderAssigned){
         console.log('transport builder')
         assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name, this.name);
@@ -104,10 +107,8 @@ function numberOfBuilders(roomName){
 }
 
 Room.prototype.isMinerNeeded = function(assignedSpawn){
-    // TODO: Get all miners with the room as target
-    const miners = this.find(FIND_MY_CREEPS, {
-        filter: (c) => c.memory.role === 'miner'
-    });
+    let roomName = this.name;
+    const miners = _.map(Game.creeps, function(c){ if(c.memory.role === 'miner' && c.memory.target === roomName){return c}})
     let name;
     for(let i = 0; i < this.memory.remoteMining.sources.length; i++){
             name = this.spawnForSource(this.memory.remoteMining.sources[i], miners, assignedSpawn);
@@ -121,16 +122,21 @@ Room.prototype.spawnForSource = function(source, miners, assignedSpawn){
         const miningWorkParts = Math.ceil((source.energyCapacity / 300) / 2);
         let workersAssignToSource = 0;
         
+        console.log(miners)
         for(let i = 0; i < miners.length; i++){
-            if(miners[i].memory.sourceId === source.id){
+            if(miners[i] != undefined && miners[i].memory.sourceId === source.id){
                 workersAssignToSource++;
             }
         }
+        console.log(this.name)
+        console.log()
+        console.log(workersAssignToSource < source.avialableSpots && currentWorkParts < miningWorkParts)
         if(workersAssignToSource < source.avialableSpots && currentWorkParts < miningWorkParts){
             // container block auslagern wegen remote mining
             let containers = this.memory.containers
             let containerNearSource = false;
             let sourceContainer;
+            console.log(containers)
             if(containers != undefined){
                 for(let name in containers){
                     let container = Game.getObjectById(containers[name].id);
@@ -141,10 +147,13 @@ Room.prototype.spawnForSource = function(source, miners, assignedSpawn){
                     }
                 }
             }
-
+            console.log(containerNearSource)
             let energy = 0;
             if(workersAssignToSource != undefined){
+                console.log(containerNearSource)
+                console.log(workersAssignToSource)
                 if(containerNearSource === true && workersAssignToSource >= 1){
+                    console.log('should abort')
                     return 'source has container and miner';
                 }
                 energy = assignedSpawn.room.energyAvailable;
@@ -153,5 +162,6 @@ Room.prototype.spawnForSource = function(source, miners, assignedSpawn){
             } else{
                 energy = assignedSpawn.room.energyAvailable;
             }
+            console.log('would spawn')
             return assignedSpawn.spawnMiner(energy, source.id, this.name, miningWorkParts, 1, sourceContainer);
 } }
