@@ -122,36 +122,28 @@ Room.prototype.spawnForSource = function(source, miners, assignedSpawn){
         const miningWorkParts = Math.ceil((source.energyCapacity / 300) / 2);
         let workersAssignToSource = 0;
         
-        console.log(miners)
         for(let i = 0; i < miners.length; i++){
             if(miners[i] != undefined && miners[i].memory.sourceId === source.id){
                 workersAssignToSource++;
             }
         }
-        console.log(this.name)
-        console.log()
-        console.log(workersAssignToSource < source.avialableSpots && currentWorkParts < miningWorkParts)
         if(workersAssignToSource < source.avialableSpots && currentWorkParts < miningWorkParts){
             // container block auslagern wegen remote mining
             let containers = this.memory.containers
             let containerNearSource = false;
             let sourceContainer;
-            console.log(containers)
             if(containers != undefined){
                 for(let name in containers){
                     let container = Game.getObjectById(containers[name].id);
-                    if(container.pos.inRangeTo(source.pos.x, source.pos.y, 1, source) === true){
+                    if(container != null && container.pos.inRangeTo(source.pos.x, source.pos.y, 1, source) === true){
                         
                         containerNearSource = container.pos.inRangeTo(container.pos.x, container.pos.y, 1, source);
                         sourceContainer = container.pos;
                     }
                 }
             }
-            console.log(containerNearSource)
             let energy = 0;
             if(workersAssignToSource != undefined){
-                console.log(containerNearSource)
-                console.log(workersAssignToSource)
                 if(containerNearSource === true && workersAssignToSource >= 1){
                     console.log('should abort')
                     return 'source has container and miner';
@@ -162,6 +154,5 @@ Room.prototype.spawnForSource = function(source, miners, assignedSpawn){
             } else{
                 energy = assignedSpawn.room.energyAvailable;
             }
-            console.log('would spawn')
             return assignedSpawn.spawnMiner(energy, source.id, this.name, miningWorkParts, 1, sourceContainer);
 } }
