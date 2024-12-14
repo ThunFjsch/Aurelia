@@ -55,6 +55,9 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
                     delete this.memory.claimRoom;
                 }
             }
+            else if(role == 'scout'){
+                name = this.createScout(50)
+            }
             
             // if no claim order was found, check other roles
             else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
@@ -132,6 +135,13 @@ StructureSpawn.prototype.createCustomCreep = function (roleName, target) {
     }
     // create creep with the created body and the given role
     return this.spawnCreep(body, generateName(roleName), {memory: {role: roleName, state: false, target: target, home: this.room.name}});
+};
+
+StructureSpawn.prototype.createScout = function () {
+    var body = [];
+    body.push(MOVE)
+    // create creep with the created body and the given role
+    return this.spawnCreep(body, generateName('scout'), {memory: {role: 'scout'}});
 };
 
 StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningWorkParts, moveParts, sourceContainer){

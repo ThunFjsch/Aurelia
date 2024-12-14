@@ -3,7 +3,7 @@ module.exports = {
     run: function(creep) {
         creep.switchWorkState();
         // if creep is supposed to transfer energy to the spawn
-        
+        creep.closeToDeath();
         if (creep.memory.state) {
             if(creep.room.name === creep.memory.home){
                 creep.getDropOff();

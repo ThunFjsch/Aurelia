@@ -8,13 +8,25 @@ var roles = {
     transporter: require('role.transport'),
     fighter: require('role.fighter'),
     healer: require('role.healer'),
-    rangedFighter: require('role.fighterRanged')
+    rangedFighter: require('role.fighterRanged'),
+    scout: require('role.scout')
 };
 
 Creep.prototype.runRole = function(){
     
     if(roles[this.memory.role] != undefined){
         roles[this.memory.role].run(this);
+    }
+}
+
+Creep.prototype.closeToDeath = function(){
+    if(this.ticksToLive === 2){
+        if(this.memory.dropOff != undefined){
+            delete this.room.memory.dropOffs[this.memory.dropOff.job];
+        }
+        if(this.memory.pickup != undefined){
+            delete this.room.memory.pickups[this.memory.pickup.job];
+        }
     }
 }
 

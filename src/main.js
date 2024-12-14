@@ -2,6 +2,7 @@ require('prototype.room');
 require('prototype.spawn');
 require('prototype.tower');
 require('prototype.creep');
+const sourceManager = require('sourceManager');
 const profiler = require('screeps-profiler');
 
 // This line monkey patches the global prototypes
@@ -39,6 +40,10 @@ module.exports.loop = function () {
         for (let name in Game.creeps) {
             // run creep logic
             Game.creeps[name].runRole();
+        }
+        
+        if(Memory.sources === undefined){
+            sourceManager.init();
         }
     });
 }

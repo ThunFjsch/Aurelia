@@ -21,16 +21,19 @@ module.exports = {
                     });
                     
                     
-                    console.log(creep.name)
-                    new RoomVisual(creep.room.name).line(target.pos.x, target.pos.y, creep.pos.x, creep.pos.y)
-                console.log( creep.moveTo(target, {maxOps: 20000, range: 1, ignoreDestructibleStructures: true}))
-                    console.log(JSON.stringify(new RoomPosition(creep.pos.x, creep.pos.y, creep.room.name).findPathTo(target.pos.x, target.pos.y, {maxOps: 20000,  ignoreDestructibleStructures: true})))
-                
+                    
                     
                      //console.log(source)
                      if(target === null){
                          target === source
                      }
+                     
+                  //   console.log(creep.name)
+                    //new RoomVisual(creep.room.name).line(target.pos.x, target.pos.y, creep.pos.x, creep.pos.y)
+                //console.log( creep.moveTo(target, {maxOps: 20000, range: 1, ignoreDestructibleStructures: true}))
+                   //console.log(JSON.stringify(new RoomPosition(creep.pos.x, creep.pos.y, creep.room.name).findPathTo(target.pos.x, target.pos.y, {maxOps: 20000,  ignoreDestructibleStructures: true})))
+                
+
                     //console.log(creep.moveTo(source))
                     if(target) {
                         if(creep.harvest(target) == ERR_NOT_IN_RANGE) {
