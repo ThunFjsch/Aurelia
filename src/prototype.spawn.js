@@ -76,8 +76,8 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     if(name==undefined && this.memory.attackRoom){
         if(this.memory.attackRoom){
             numberOfAttacker[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
-                    c.memory.role == 'fighter');
-            if (numberOfAttacker[this.memory.attackRoom] < 2) {
+                    c.memory.role === 'fighter' && c.memory.home === this.room.name);
+            if (numberOfAttacker[this.memory.attackRoom] < 1) {
                 name = this.createAttacker(maxEnergy, 'fighter', this.room.name, this.memory.attackRoom);
             }
         }

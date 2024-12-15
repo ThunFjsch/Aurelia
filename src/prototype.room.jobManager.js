@@ -160,8 +160,12 @@ Room.prototype.generateDropOff = function (target){
     let hasJob = false;
     for(let dropOff in this.memory.dropOffs){
         let currentDropOff = this.memory.dropOffs[dropOff];
-        if(currentDropOff.target === target.id){
+        
+        if(currentDropOff.target === target.id ){
             hasJob = true
+            break;
+        } if(Game.creeps[currentDropOff.assignee] === undefined && currentDropOff.isAssigned){
+            delete this.memory.dropOffs[dropOff];
             break;
         } if(currentDropOff.isAssigned && Game.creeps[currentDropOff.assignee] != undefined){
             if(Game.creeps[currentDropOff.assignee].dropOff === undefined){
