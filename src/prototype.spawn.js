@@ -71,7 +71,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     
     /*
     Attack Spawn Logic
-    */
+    *//*
     let numberOfAttacker = {};
     if(name==undefined && this.memory.attackRoom){
         if(this.memory.attackRoom){
@@ -81,24 +81,24 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
                 name = this.createAttacker(maxEnergy, 'fighter', this.room.name, this.memory.attackRoom);
             }
         }
-    }
-    /*
+    }*/
+    
     let numberOfRangedFighter = {};
     if(name==undefined && this.memory.attackRoom){
         if(this.memory.attackRoom){
             numberOfRangedFighter[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
-                    c.memory.role == 'rangedFighter');
-            if (numberOfRangedFighter[this.memory.attackRoom] < 2) {
+                    c.memory.role == 'rangedFighter' && c.memory.home === this.room.name);
+            if (numberOfRangedFighter[this.memory.attackRoom] < 1) {
                 name = this.createRangedFighter(maxEnergy, 'rangedFighter', this.room.name, this.memory.attackRoom);
             }
         }
     }
-    
+    /*
     let numberOfHealer = {};
     if(name==undefined && this.memory.attackRoom){
         if(this.memory.attackRoom){
             numberOfHealer[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
-                    c.memory.role == 'healer');
+                    c.memory.role == 'healer' && c.memory.home === this.room.name);
             if (numberOfHealer[this.memory.attackRoom] < 0) {
                 name = this.createHealer(maxEnergy, 'healer', this.room.name, this.memory.attackRoom);
             }

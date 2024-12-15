@@ -39,7 +39,7 @@ Room.prototype.spawnManager = function(){
 
 Room.prototype.isTransportNeeded = function(assignedSpawn, energyAvailable){
     const transportRequests = Object.keys(this.memory.pickups).length;
-    let requiredTransports = Math.floor(transportRequests / 4);
+    let requiredTransports = Math.floor(transportRequests / 3);
     let roomName = this.name;
     let foo = _.map(Game.creeps, function(c){ return c.memory.role === 'transporter' && c.memory.target === roomName})
     let transporterAssigned = 0;
@@ -48,8 +48,7 @@ Room.prototype.isTransportNeeded = function(assignedSpawn, energyAvailable){
             transporterAssigned++;
         }
     }
-    //console.log(this.name)
-    //console.log(transporterAssigned < requiredTransports)
+    
     if(transporterAssigned < requiredTransports){
         assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name);
     }
@@ -65,7 +64,8 @@ Room.prototype.remoteBuilderTransport = function(assignedSpawn, energyAvailable)
         }
     }
     let builderAssigned = numberOfBuilders(this.name);
-   // console.log(transporterAssigned < builderAssigned)
+    
+    //console.log(transporterAssigned < builderAssigned)
     if(transporterAssigned < builderAssigned){
         console.log('transport builder')
         assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name, this.name);

@@ -12,7 +12,7 @@ Room.prototype.roomManager = function(){
     let currentTick = Game.time;
     if(this.memory.lastExecution === undefined){
         this.memory.lastExecution = currentTick;
-    } else if(this.memory.lastExecution + 10 < currentTick){
+    } else if(this.memory.lastExecution + 5 < currentTick){
         this.memory.lastExecution = currentTick;
         this.jobManager();
         this.spawnManager();

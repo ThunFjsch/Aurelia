@@ -121,6 +121,10 @@ Room.prototype.getCurrentPickUps = function(targetId) {
             currentPickUp.isAssigned = false;
             currentPickUp.assignee = undefined;
         }
+        else if(currentPickUp.isAssigned === true && Game.creeps[this.memory.pickups[pickUp]] === undefined){
+            currentPickUp.isAssigned = false;
+            currentPickUp.assignee = undefined;
+        }
         
         // current job has container id, add to the requests
         if(currentPickUp.target === targetId){
