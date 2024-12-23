@@ -38,15 +38,15 @@ Room.prototype.roomManager = function(){
                     }
                 }
                 
-                
+                /*
                 console.log(roomName);
                 console.log(source.assignedTo)
                 console.log(source.id)
                 console.log(currentWorkParts)
                 console.log(miningWorkParts)
-                
-                
-                if(workersAssignToSource < source.miningSpots.length && currentWorkParts < miningWorkParts){
+                */
+                //source.miningSpots.length
+                if(workersAssignToSource < 1 && currentWorkParts < miningWorkParts){
                     // container block auslagern wegen remote mining
                     let containers;
                     if(Game.rooms[roomName] != undefined){

@@ -39,44 +39,42 @@ module.exports = {
                 let routeCost = 0;
                 
                 
-                    const sourcePos = source.pos;
+                const sourcePos = source.pos;
+                let from = new RoomPosition(spawnPos.x, spawnPos.y, spawnRoom);
+                let to = new RoomPosition(sourcePos.x, sourcePos.y, source.room.name)
+                // Use `findRoute` to calculate a high-level plan for this path,
+                // prioritizing highways and owned rooms
+                let allowedRooms = { [ from.roomName ]: true };
+                Game.map.findRoute(from.roomName, to.roomName, {
+                    routeCallback(roomName) {
+                      let parsed = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName);
+                      let isHighway = (parsed[1] % 10 === 0) || 
+                                      (parsed[2] % 10 === 0);
+                      let isMyRoom = Game.rooms[roomName] &&
+                                    Game.rooms[roomName].controller &&
+                                    Game.rooms[roomName].controller.my;
+                      if (isHighway || isMyRoom) {
+                        return 1;
+                      } else {
+                        return 2.5;
+                      }
+                    }
+                }).forEach(function(info) {
+                    allowedRooms[info.room] = true;
+                });
                     
-                    let from = new RoomPosition(spawnPos.x, spawnPos.y, spawnRoom);
-                    let to = new RoomPosition(sourcePos.x, sourcePos.y, source.room.name)
-                    // Use `findRoute` to calculate a high-level plan for this path,
-                    // prioritizing highways and owned rooms
-                    let allowedRooms = { [ from.roomName ]: true };
-                    Game.map.findRoute(from.roomName, to.roomName, {
-                        routeCallback(roomName) {
-                            let parsed = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName);
-                            let isHighway = (parsed[1] % 10 === 0) || 
-                                            (parsed[2] % 10 === 0);
-                            let isMyRoom = Game.rooms[roomName] &&
-                                Game.rooms[roomName].controller &&
-                                Game.rooms[roomName].controller.my;
-                            if (isHighway || isMyRoom) {
-                                return 1;
-                            } else {
-                                return 2.5;
-                            }
+                // Invoke PathFinder, allowing access only to rooms from `findRoute`
+                let ret = PathFinder.search(from, to, {
+                    roomCallback(roomName) {
+                        if (allowedRooms[roomName] === undefined) {
+                            return false;
                         }
-                    }).forEach(function(info) {
-                        allowedRooms[info.room] = true;
-                    });
-                    
-                    // Invoke PathFinder, allowing access only to rooms from `findRoute`
-                    let ret = PathFinder.search(from, to, {
-                        roomCallback(roomName) {
-                            if (allowedRooms[roomName] === undefined) {
-                                return false;
-                            }
-                        }
-                    });
-                    routeCost = ret.cost;
+                    }
+                });
+                routeCost = ret.cost;
                 
                 availableSpawnsPathCost.push({target: spawnRoom, pathCost: routeCost})
             }
-    
 
             let assignee = '';
             let lowestCost = 1000;
@@ -98,9 +96,7 @@ module.exports = {
                 for(let struc in hasStructure){
                     
                     if(hasStructure[struc].structure != undefined && hasStructure[struc].structure.structureType != 'container' && hasStructure[struc].structure.structureType != 'road'){
-                        console.log(hasStructure[struc].structure.structureType)
                         delete miningSpots[spot];
-                        console.log(miningSpots[spot])
                     }
                 }
             }
@@ -108,54 +104,14 @@ module.exports = {
         miningSpots = miningSpots.filter(elm => elm);
         for(let i = 0; i < miningSpots.length; i++){
             if(miningSpots[i] != null && !_.isEmpty(miningSpots[i])){
+                const assignee = Game.rooms[assignedSpawn].find(FIND_MY_SPAWNS)[0].pos;
+                let to = new RoomPosition(miningSpots[i].x, miningSpots[i].y, source.room.name);
+                let from = new RoomPosition(assignee.x, assignee.y, assignedSpawn);
+                const generatedPath = createPathToMiningSpot(from, to, miningSpots, miningSpots[i]);
                 
-            const assignee = Game.rooms[assignedSpawn].find(FIND_MY_SPAWNS)[0].pos;
-            const sourcePos = source.pos;
-            let to = new RoomPosition(miningSpots[i].x, miningSpots[i].y, source.room.name);
-                    let from = new RoomPosition(assignee.x + 1, assignee.y, assignedSpawn)
-                    // Use `findRoute` to calculate a high-level plan for this path,
-                    // prioritizing highways and owned rooms
-                    let allowedRooms = { [ from.roomName ]: true };
-                    Game.map.findRoute(from.roomName, to.roomName, {
-                        routeCallback(roomName) {
-                            let parsed = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName);
-                            let isHighway = (parsed[1] % 10 === 0) || 
-                                            (parsed[2] % 10 === 0);
-                            let isMyRoom = Game.rooms[roomName] &&
-                                Game.rooms[roomName].controller &&
-                                Game.rooms[roomName].controller.my;
-                                
-                            roomName.find(FIND_STRUCTURES).forEach(function(struct) {
-                              if (struct.structureType === STRUCTURE_ROAD) {
-                                // Favor roads over plain tiles
-                                costs.set(struct.pos.x, struct.pos.y, 1);
-                              } else if (struct.structureType !== STRUCTURE_CONTAINER &&
-                                         (struct.structureType !== STRUCTURE_RAMPART)) {
-                                // Can't walk through non-walkable buildings
-                                costs.set(struct.pos.x, struct.pos.y, 255);
-                              }
-                            });
-                            if (isHighway || isMyRoom) {
-                                return 1;
-                            } else {
-                                return 2.5;
-                            }
-                        }
-                    }).forEach(function(info) {
-                        allowedRooms[info.room] = true;
-                    });
-                    
-                    // Invoke PathFinder, allowing access only to rooms from `findRoute`
-                    let ret = PathFinder.search(from, to, {
-                        roomCallback(roomName) {
-                            if (allowedRooms[roomName] === undefined) {
-                                return false;
-                            }
-                        }
-                    });
-                    miningSpots[i].isAssigned = false;
-                    miningSpots[i].path = ret.path;
-                    miningSpots[i].pathCost = ret.cost;
+                miningSpots[i].isAssigned = false;
+                miningSpots[i].path = generatedPath.path;
+                miningSpots[i].pathCost = generatedPath.cost;
             }
         }
         let reserve;
@@ -182,6 +138,81 @@ module.exports = {
         
         Memory.sourceInfo.sources.push(newSource);
     }
-    
-    
 };
+
+function createPathToMiningSpot(fromPos, toPos, miningSpots, currentSpot) {
+  var settings = require("settings");
+
+  let allowedRooms = {
+    [fromPos.roomName]: true,
+  };
+
+  PathFinder.use(true);
+  let route = Game.map.findRoute(fromPos.roomName, toPos.roomName, {
+    routeCallback(roomName) {
+      let parsed = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName);
+      let isHighway = parsed[1] % 10 === 0 || parsed[2] % 10 === 0;
+
+      if (isHighway) {
+        return 1;
+      } else if (settings.avoidedRooms.includes(roomName)) {
+        return Infinity;
+      } else {
+        return 1.5;
+      }
+    },
+  });
+
+  // Didn't find a path!
+  if (route == ERR_NO_PATH) {
+    console.log(
+      `Error finding path to ${toPos.roomName} from ${fromPos.roomName}`,
+    );
+    return;
+  }
+
+  route.forEach(function (info) {
+    allowedRooms[info.room] = true;
+  });
+
+  // Invoke PathFinder, allowing access only to rooms from `findRoute`
+  let ret = PathFinder.search(fromPos, toPos, {
+    plainCost: 1,
+    swampCost: 3,
+    roomCallback(roomName) {
+      if (allowedRooms[roomName] === undefined) {
+        return false;
+      }
+      let room = Game.rooms[roomName];
+      // In this example `room` will always exist, but since PathFinder
+      // supports searches which span multiple rooms you should be careful!
+      if (!room) return;
+
+      let costs = new PathFinder.CostMatrix();
+
+      room.find(FIND_STRUCTURES).forEach(function (structure) {
+        if (structure.structureType === STRUCTURE_ROAD) {
+          // Favor roads over plain tiles
+          costs.set(structure.pos.x, structure.pos.y, 1);
+        } else if (
+          structure.structureType !== STRUCTURE_CONTAINER &&
+          (structure.structureType !== STRUCTURE_RAMPART || !structure.my)
+        ) {
+          // Can't walk through non-walkable buildings
+          costs.set(structure.pos.x, structure.pos.y, 0xff);
+        }
+      });
+      
+      for(let spot in miningSpots){
+        spotPos = miningSpots[spot];
+        if(currentSpot.x != spotPos.x && currentSpot.y != spotPos.y){
+            costs.set(spotPos.x, spotPos.y, 10);
+        }
+      }
+      
+      return costs;
+    },
+  });
+
+  return ret;
+}
