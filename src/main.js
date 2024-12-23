@@ -6,9 +6,9 @@ const sourceManager = require('sourceManager');
 const profiler = require('screeps-profiler');
 
 // This line monkey patches the global prototypes
-profiler.enable();
+//profiler.enable();
 module.exports.loop = function () {
-    profiler.wrap(function() {
+    //profiler.wrap(function() {
         // Executes the screep logic first
         for (let creep in Memory.creeps) {
             // and checking if the creep is still alive
@@ -45,5 +45,5 @@ module.exports.loop = function () {
         if(Memory.sources === undefined){
             sourceManager.init();
         }
-    });
+    //});
 }

@@ -13,6 +13,12 @@ module.exports = {
             Memory.sourceInfo = {
                 sources: []
             };
+            for(let index in Game.spawns){
+                let source = Game.spawns[index].room.find(FIND_SOURCES);
+                for(let name in source){
+                    module.exports.addSource(source[name]);
+                }
+            }
         }
     },
 
@@ -85,14 +91,28 @@ module.exports = {
         
         const temp = source.room.lookForAtArea(LOOK_TERRAIN,source.pos.y-1,source.pos.x-1,source.pos.y+1,source.pos.x+1,true)
         let miningSpots = _.map(temp, function(t){ if(t.terrain != 'wall'){return t}});
-        
+        miningSpots = miningSpots.filter(elm => elm);
+        for(let spot in miningSpots){
+            let hasStructure = source.room.lookAt(miningSpots[spot].x, miningSpots[spot].y);
+            if(hasStructure != undefined){
+                for(let struc in hasStructure){
+                    
+                    if(hasStructure[struc].structure != undefined && hasStructure[struc].structure.structureType != 'container' && hasStructure[struc].structure.structureType != 'road'){
+                        console.log(hasStructure[struc].structure.structureType)
+                        delete miningSpots[spot];
+                        console.log(miningSpots[spot])
+                    }
+                }
+            }
+        }
+        miningSpots = miningSpots.filter(elm => elm);
         for(let i = 0; i < miningSpots.length; i++){
-            if(miningSpots[i] != null){
+            if(miningSpots[i] != null && !_.isEmpty(miningSpots[i])){
                 
             const assignee = Game.rooms[assignedSpawn].find(FIND_MY_SPAWNS)[0].pos;
             const sourcePos = source.pos;
-            let from = new RoomPosition(miningSpots[i].x, miningSpots[i].y, source.room.name);
-                    let to = new RoomPosition(assignee.x, assignee.y, assignedSpawn)
+            let to = new RoomPosition(miningSpots[i].x, miningSpots[i].y, source.room.name);
+                    let from = new RoomPosition(assignee.x + 1, assignee.y, assignedSpawn)
                     // Use `findRoute` to calculate a high-level plan for this path,
                     // prioritizing highways and owned rooms
                     let allowedRooms = { [ from.roomName ]: true };
@@ -104,6 +124,17 @@ module.exports = {
                             let isMyRoom = Game.rooms[roomName] &&
                                 Game.rooms[roomName].controller &&
                                 Game.rooms[roomName].controller.my;
+                                
+                            roomName.find(FIND_STRUCTURES).forEach(function(struct) {
+                              if (struct.structureType === STRUCTURE_ROAD) {
+                                // Favor roads over plain tiles
+                                costs.set(struct.pos.x, struct.pos.y, 1);
+                              } else if (struct.structureType !== STRUCTURE_CONTAINER &&
+                                         (struct.structureType !== STRUCTURE_RAMPART)) {
+                                // Can't walk through non-walkable buildings
+                                costs.set(struct.pos.x, struct.pos.y, 255);
+                              }
+                            });
                             if (isHighway || isMyRoom) {
                                 return 1;
                             } else {
@@ -124,29 +155,32 @@ module.exports = {
                     });
                     miningSpots[i].isAssigned = false;
                     miningSpots[i].path = ret.path;
-            } else{
-                delete miningSpots[i];
+                    miningSpots[i].pathCost = ret.cost;
             }
         }
         let reserve;
-        if( Game.rooms[source.room.name].controller.reservation != undefined ||
-            Game.rooms[source.room.name].controller.owner != undefined){
+        let isOwned;
+        if( Game.rooms[source.room.name].controller.reservation != undefined){
             
             reserve = true;
         } else { reserve = false;}
         
+        if(Game.rooms[source.room.name].controller.owner != undefined){
+            isOwned = true;
+        } else{isOwned = false}
         
         let newSource = {
             id: source.id,
             assignedTo: assignedSpawn,
             construction: false,
             reserved: reserve,
+            owned: isOwned,
+            pos: source.pos,
+            room: source.room.name,
             miningSpots: miningSpots
         };
         
         Memory.sourceInfo.sources.push(newSource);
-        console.log(Memory.sourceInfo.sources);
-        //console.log(JSON.stringify(newSource, null, 2))
     }
     
     

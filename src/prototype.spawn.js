@@ -144,7 +144,7 @@ StructureSpawn.prototype.createScout = function () {
     return this.spawnCreep(body, generateName('scout'), {memory: {role: 'scout'}});
 };
 
-StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningWorkParts, moveParts, sourceContainer){
+StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningWorkParts, moveParts, sourceContainer, assignedPath){
     var body = [];
         // create a balanced body as big as possible with the given energy
         var numberOfParts = Math.floor((energy - BODYPART_COST[MOVE]) / BODYPART_COST[WORK]);
@@ -163,7 +163,7 @@ StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningW
             return ERR_NOT_ENOUGH_ENERGY;
         }
         
-        return this.spawnCreep(body, generateName('miner'), {memory: { role: 'miner', sourceId: sourceId, target: target, containerPos: sourceContainer }});
+        return this.spawnCreep(body, generateName('miner'), {memory: { role: 'miner', sourceId: sourceId, target: target, containerPos: sourceContainer, path: assignedPath }});
 };
 
 StructureSpawn.prototype.createAttacker = function (energy, roleName, home, target) {

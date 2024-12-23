@@ -6,7 +6,7 @@ Room.prototype.spawnManager = function(){
             for(let name in spawns){
                 let currentSpawn = spawns[name];
                 let spawnState;
-                spawnState = this.isMinerNeeded(currentSpawn);
+                //spawnState = this.isMinerNeeded(currentSpawn);
                 
                 if(spawnState === undefined){
                     spawnState = this.isTransportNeeded(currentSpawn, currentSpawn.room.energyAvailable)
@@ -22,7 +22,7 @@ Room.prototype.spawnManager = function(){
             }));
             if(hasMiners){
                 const energyAvailable = assignedSpawn.room.energyAvailable;
-                let spawnState = this.isMinerNeeded(assignedSpawn);
+                let spawnState; //this.isMinerNeeded(assignedSpawn);
                 if(spawnState === undefined){
                     this.isTransportNeeded(assignedSpawn, energyAvailable)
                 }
@@ -65,7 +65,6 @@ Room.prototype.remoteBuilderTransport = function(assignedSpawn, energyAvailable)
     }
     let builderAssigned = numberOfBuilders(this.name);
     
-    //console.log(transporterAssigned < builderAssigned)
     if(transporterAssigned < builderAssigned){
         console.log('transport builder')
         assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name, this.name);
