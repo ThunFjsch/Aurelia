@@ -45,8 +45,7 @@ Room.prototype.roomManager = function(){
                 console.log(currentWorkParts)
                 console.log(miningWorkParts)
                 */
-                //source.miningSpots.length
-                if(workersAssignToSource < 1 && currentWorkParts < miningWorkParts){
+                if(workersAssignToSource < source.miningSpots.length & currentWorkParts < miningWorkParts){
                     // container block auslagern wegen remote mining
                     let containers;
                     if(Game.rooms[roomName] != undefined){
@@ -82,6 +81,7 @@ Room.prototype.roomManager = function(){
                     for(let spot in source.miningSpots){
                         if(!source.miningSpots[spot].isAssigned){
                             assignedPath = source.miningSpots[spot];
+                            source.miningSpots[spot].isAssigned = true;
                             break;
                         }
                     }
