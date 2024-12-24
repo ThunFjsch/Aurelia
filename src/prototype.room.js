@@ -38,15 +38,7 @@ Room.prototype.roomManager = function(){
                     }
                 }
                 
-                /*
-                console.log(roomName);
-                console.log(source.assignedTo)
-                console.log(source.id)
-                console.log(currentWorkParts)
-                console.log(miningWorkParts)
-                */
-                //source.miningSpots.length
-                if(workersAssignToSource < 1 && currentWorkParts < miningWorkParts){
+               if(workersAssignToSource < source.miningSpots.length & currentWorkParts < miningWorkParts){
                     // container block auslagern wegen remote mining
                     let containers;
                     if(Game.rooms[roomName] != undefined){
@@ -64,37 +56,45 @@ Room.prototype.roomManager = function(){
                             }
                         }
                     }
-                    let energy = 0;
+                    let energy = Game.rooms[source.assignedTo].energyAvailable;
                     if(workersAssignToSource != undefined){
-                    
                         if(containerNearSource === true && workersAssignToSource >= 1){
                             console.log('should abort')
                             // 'source has container and miner';
                             continue;
                         }
-                        energy = Game.rooms[source.assignedTo].energyAvailable;
-                    } else if(containerNearSource === true){
-                        energy = Game.rooms[source.assignedTo].energyAvailable;
-                    } else{
-                        energy = Game.rooms[source.assignedTo].energyAvailable;
                     }
                     let assignedPath;
+                    let assignedSpot;
                     for(let spot in source.miningSpots){
                         if(!source.miningSpots[spot].isAssigned){
-                            assignedPath = source.miningSpots[spot];
-                            break;
+                            const containers = Game.rooms[source.room].memory.containers;
+                            for(let name in containers){
+                                const container = Game.getObjectById(containers[name].id);
+                                if(container != undefined && container.pos.x === source.miningSpots[spot].x && container.pos.x === source.miningSpots[spot].x){
+                                    assignedPath = source.miningSpots[spot];
+                                    assignedSpot = spot;
+                                    break;      
+                                }
+                            }
                         }
                     }
-                    if(source.room === Game.rooms[source.assignedTo].find(FIND_MY_SPAWNS)[0].room.name && source.owned){
+                    if(assignedSpot === undefined){
+                        for(let spot in source.miningSpots){
+                                if(!source.miningSpots[spot].isAssigned){
+                                    assignedPath = source.miningSpots[spot];
+                                    assignedSpot = spot;
+                                    break;      
+                            }
+                        }
+                    }
+                    if(assignedPath != undefined && source.room === Game.rooms[source.assignedTo].find(FIND_MY_SPAWNS)[0].room.name && source.owned){
                         let foo = Game.rooms[source.assignedTo].find(FIND_MY_SPAWNS)[0].spawnMiner(energy, source.id, this.name, miningWorkParts, 1, sourceContainer, assignedPath);
+                        if(foo === OK){
+                            source.miningSpots[assignedSpot].isAssigned = true;
+                        }
                         console.log(foo)
                     }
-                    /*
-                    if(source.assignedTo != Game.rooms[source.assignedTo].find(FIND_MY_SPAWNS)[0].room.name){
-                        let foo = Game.rooms[source.assignedTo].find(FIND_MY_SPAWNS)[0].spawnMiner(energy, source.id, source.room, miningWorkParts, 1, sourceContainer, assignedPath);
-                        console.log(foo)
-                    }*/
-                   
                 }
             }
         }
