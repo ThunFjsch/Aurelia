@@ -4,6 +4,25 @@ module.exports = function(grunt) {
     grunt.initConfig({
         screeps: {
             options: {
+                server: {
+                    host: 'screeps.newbieland.net',
+                    port: 21025,
+                    http: true
+                },
+                email: config.email,
+                password: config.passwordNewby,
+                branch: 'default',
+                ptr: false
+            },
+            dist: {
+                src: ['src/*.js']
+            }
+        }
+    });
+}
+
+/**
+ * options: {
                 email: config.email,
                 token: config.password,
                 branch: config.branch,
@@ -11,7 +30,4 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: ['src/*.js'],
-            }
-        }
-    });
-}
+ */
