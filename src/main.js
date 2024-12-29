@@ -26,6 +26,12 @@ module.exports.loop = function () {
             tower.defend();
         }
         
+        if(Memory.sourceInfo === undefined){
+            sourceManager.init();
+        } else{
+            sourceManager.spawnForSources();
+        }
+        
         for(let room in Memory.rooms){
             if(Game.rooms[room] != undefined){
                 Game.rooms[room].roomManager();
@@ -40,10 +46,6 @@ module.exports.loop = function () {
         for (let name in Game.creeps) {
             // run creep logic
             Game.creeps[name].runRole();
-        }
-        
-        if(Memory.sources === undefined){
-            sourceManager.init();
         }
     //});
 }

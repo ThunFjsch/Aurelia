@@ -134,17 +134,17 @@ StructureSpawn.prototype.createCustomCreep = function (roleName, target) {
         body.push(MOVE);
     }
     // create creep with the created body and the given role
-    return this.spawnCreep(body, generateName(roleName), {memory: {role: roleName, state: false, target: target, home: this.room.name}});
+    return this.spawnCreep(body, this.generateName(roleName), {memory: {role: roleName, state: false, target: target, home: this.room.name}});
 };
 
 StructureSpawn.prototype.createScout = function () {
     var body = [];
     body.push(MOVE)
     // create creep with the created body and the given role
-    return this.spawnCreep(body, generateName('scout'), {memory: {role: 'scout'}});
+    return this.spawnCreep(body, this.generateName('scout'), {memory: {role: 'scout'}});
 };
 
-StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningWorkParts, moveParts, sourceContainer, assignedPath){
+StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningWorkParts, moveParts, sourceContainer, assignedPath, name){
     var body = [];
         // create a balanced body as big as possible with the given energy
         var numberOfParts = Math.floor((energy - BODYPART_COST[MOVE]) / BODYPART_COST[WORK]);
@@ -163,7 +163,7 @@ StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningW
             return ERR_NOT_ENOUGH_ENERGY;
         }
         
-        return this.spawnCreep(body, generateName('miner'), {memory: { role: 'miner', sourceId: sourceId, target: target, containerPos: sourceContainer, path: assignedPath }});
+        return this.spawnCreep(body, name,{memory: { role: 'miner', sourceId: sourceId, target: target, containerPos: sourceContainer, path: assignedPath }});
 };
 
 StructureSpawn.prototype.createAttacker = function (energy, roleName, home, target) {
@@ -181,7 +181,7 @@ StructureSpawn.prototype.createAttacker = function (energy, roleName, home, targ
                 body.push(ATTACK);
             }
     // create creep with the created body
-    return this.spawnCreep(body, generateName(roleName), {memory: {
+    return this.spawnCreep(body, this.generateName(roleName), {memory: {
         role: roleName,
         home: home,
         attackRoom: target,
@@ -202,7 +202,7 @@ StructureSpawn.prototype.createHealer = function (energy, roleName, home, target
                 body.push(HEAL);
             }
     // create creep with the created body
-    return this.spawnCreep(body, generateName(roleName), {memory: {
+    return this.spawnCreep(body, this.generateName(roleName), {memory: {
         role: roleName,
         home: home,
         attackRoom: target,
@@ -223,7 +223,7 @@ StructureSpawn.prototype.createRangedFighter = function (energy, roleName, home,
                 body.push(RANGED_ATTACK);
             }
     // create creep with the created body
-    return this.spawnCreep(body, generateName(roleName), {memory: {
+    return this.spawnCreep(body, this.generateName(roleName), {memory: {
         role: roleName,
         home: home,
         attackRoom: target,
@@ -252,7 +252,7 @@ StructureSpawn.prototype.createTransporter = function (energy, roleName, target,
     if(!_.isEmpty(body)){
         return this.spawnCreep(
             body, 
-            generateName(roleName), 
+            this.generateName(roleName), 
             {memory: { 
                 role: roleName, 
                 state: false, 
@@ -264,11 +264,11 @@ StructureSpawn.prototype.createTransporter = function (energy, roleName, target,
     }
 };
 
-StructureSpawn.prototype.createClaimer = function (target, roleName) {
-    return this.spawnCreep([CLAIM, MOVE], generateName(roleName), {memory: { role: roleName, target: target }});
+StructureSpawn.prototype.createClaimer = function(target, roleName) {
+    return this.spawnCreep([CLAIM, MOVE], this.generateName(roleName), {memory: { role: roleName, target: target }});
 };
 
 
-function generateName(roleName){
+StructureSpawn.prototype.generateName = function(roleName){
     return roleName + '_' + Math.random().toString(36).slice(2, 7).toString();
 }

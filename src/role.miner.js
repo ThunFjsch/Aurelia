@@ -1,20 +1,7 @@
 module.exports = {
     /** @param {Creep} creep **/
     run: function(creep) {
-        if(creep.ticksToLive < 5){
-            const sources = Memory.sourceInfo.sources;
-            const creepPath = creep.memory.path;
-            for(let name in sources){
-                const source = sources[name];
-                for(let name in source.miningSpots){
-                    const spot = source.miningSpots[name];
-                    if(creepPath.x === spot.x && creepPath.y === spot.y){
-                        source.miningSpots[name].isAssigned = false;
-                    }
-                }
-            }
-        }
-        if(creep.memory.path != undefined){
+            if(creep.memory.path != undefined){
             let path = creep.memory.path.path;
             let spot = creep.memory.path;
             if(path.length < 1 || path[0] === null){

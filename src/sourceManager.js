@@ -137,6 +137,103 @@ module.exports = {
         };
         
         Memory.sourceInfo.sources.push(newSource);
+    },
+
+    spawnForSources: function(){
+       if(Memory.sourceInfo != undefined){
+            for(let index in Memory.sourceInfo.sources){
+                const source = Memory.sourceInfo.sources[index]
+                let roomName = source.room;
+                const miners = _.map(Game.creeps, function(c){ if(c.memory.role === 'miner' && c.memory.target === roomName){return c}});
+                let currentWorkParts = Game.rooms[roomName].getSpecificBodyPartCountForSource(miners, 'miner', WORK, source);
+                
+                let energyCapacity;
+                if(source.reserved || source.owned){
+                    energyCapacity = 3000;
+                } else {energyCapacity = 1500;}
+                const miningWorkParts = Math.ceil((energyCapacity / 300) / 2);
+                
+                let workersAssignToSource = 0;
+                for(let i = 0; i < miners.length; i++){
+                    if(miners[i] != undefined && miners[i].memory.sourceId === source.id){
+                        workersAssignToSource++;
+                    }
+                }
+                
+               if(workersAssignToSource < source.miningSpots.length & currentWorkParts < miningWorkParts){
+                    // container block auslagern wegen remote mining
+                    let containers;
+                    if(Game.rooms[roomName] != undefined){
+                        containers = Game.rooms[roomName].memory.containers;
+                    }
+                    let containerNearSource = false;
+                    let sourceContainer;
+                    if(containers != undefined){
+                        for(let name in containers){
+                            let container = Game.getObjectById(containers[name].id);
+                            if(container != null && container.pos.inRangeTo(source.pos.x, source.pos.y, 1, source) === true){
+                                
+                                containerNearSource = container.pos.inRangeTo(container.pos.x, container.pos.y, 1, source);
+                                sourceContainer = container.pos;
+                            }
+                        }
+                    }
+                    let energy = Game.rooms[source.assignedTo].energyAvailable;
+                    if(workersAssignToSource != undefined){
+                        if(containerNearSource === true && workersAssignToSource >= 1){
+                            // 'source has container and miner';
+                            continue;
+                        }
+                    }
+                    let assignedPath;
+                    let assignedSpot;
+                    for(let spot in source.miningSpots){
+                        if(source.miningSpots[spot].isAssigned){
+                            const mineSpot = source.miningSpots[spot];
+                            const assignedCreep = mineSpot.assignee;
+                            console.log('foo')
+                            console.log(Game.creeps[assignedCreep] === undefined)
+                            if(assignedCreep != undefined && Game.creeps[assignedCreep] === undefined){
+                                mineSpot.isAssigned = false;
+                                delete mineSpot.assignee;
+                            }
+                        }
+                    }
+                    for(let spot in source.miningSpots){
+                        if(!source.miningSpots[spot].isAssigned){
+                            const containers = Game.rooms[source.room].memory.containers;
+                            for(let name in containers){
+                                const container = Game.getObjectById(containers[name].id);
+                                if(container != undefined && container.pos.x === source.miningSpots[spot].x && container.pos.x === source.miningSpots[spot].x){
+                                    assignedPath = source.miningSpots[spot];
+                                    assignedSpot = spot;
+                                    break;      
+                                }
+                            }
+                        }
+                    }
+                    if(assignedSpot === undefined){
+                        for(let spot in source.miningSpots){
+                                if(!source.miningSpots[spot].isAssigned){
+                                    assignedPath = source.miningSpots[spot];
+                                    assignedSpot = spot;
+                                    break;      
+                            }
+                        }
+                    }
+                    if(assignedPath != undefined && source.room === Game.rooms[source.assignedTo].find(FIND_MY_SPAWNS)[0].room.name && source.owned){
+                        const spawn = Game.rooms[source.assignedTo].find(FIND_MY_SPAWNS)[0];
+                        const name =  spawn.generateName('miner');
+                        let foo = spawn.spawnMiner(energy, source.id, this.name, miningWorkParts, 1, sourceContainer, assignedPath, name);
+                        if(foo === OK){
+                            source.miningSpots[assignedSpot].isAssigned = true;
+                            source.miningSpots[assignedSpot].assignee = name;
+                        }
+                    }
+                }
+            }
+        }
+
     }
 };
 
