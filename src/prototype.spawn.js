@@ -1,3 +1,5 @@
+const creepBodies = require('creep.body');
+
 let listOfRoles = [
     'harvester',
     'claimer',
@@ -14,20 +16,7 @@ let listOfRoles = [
     'fighterRanged'
 ];
 
-let minCreeps ={
-    harvester: 0,
-    miner: 2,
-    builder: 2,
-    upgrader: 0,
-    transporter: 4,
-    maintainer: 0,
-    wallRepairer: 0
-};
-
 StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
-    if(this.memory.minCreeps == undefined){
-        this.memory.minCreeps = minCreeps;
-    }
     let room = this.room;
     // find all creeps in room
     let creepsInRoom = room.find(FIND_MY_CREEPS);
@@ -58,84 +47,39 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
             else if(role == 'scout'){
                 name = this.createScout(50)
             }
-            
-            // if no claim order was found, check other roles
-            else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
-                if(role != 'miner' && role != 'transporter'){
-                    name = this.createCustomCreep(role, this.room.name);
-                }
-                break;
-            }
-        }
-    }
-    
-    /*
-    Attack Spawn Logic
-    *//*
-    let numberOfAttacker = {};
-    if(name==undefined && this.memory.attackRoom){
-        if(this.memory.attackRoom){
-            numberOfAttacker[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
-                    c.memory.role === 'fighter' && c.memory.home === this.room.name);
-            if (numberOfAttacker[this.memory.attackRoom] < 1) {
-                name = this.createAttacker(maxEnergy, 'fighter', this.room.name, this.memory.attackRoom);
-            }
-        }
-    }*/
-    
-    let numberOfRangedFighter = {};
-    if(name==undefined && this.memory.attackRoom){
-        if(this.memory.attackRoom){
-            numberOfRangedFighter[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
-                    c.memory.role == 'rangedFighter' && c.memory.home === this.room.name);
-            if (numberOfRangedFighter[this.memory.attackRoom] < 1) {
-                name = this.createRangedFighter(maxEnergy, 'rangedFighter', this.room.name, this.memory.attackRoom);
-            }
-        }
-    }
-    /*
-    let numberOfHealer = {};
-    if(name==undefined && this.memory.attackRoom){
-        if(this.memory.attackRoom){
-            numberOfHealer[this.memory.attackRoom] = _.sum(Game.creeps, (c) =>
-                    c.memory.role == 'healer' && c.memory.home === this.room.name);
-            if (numberOfHealer[this.memory.attackRoom] < 0) {
-                name = this.createHealer(maxEnergy, 'healer', this.room.name, this.memory.attackRoom);
-            }
-        }
-    }*/
-    
-    // print name to console if spawning was a success
-    if (name != undefined && _.isString(name)) {
-        console.log(this.name + " spawned new creep: " + name + " (" + Game.creeps[name].memory.role + ")");
-        for (let role of listOfRoles) {
-            console.log(role + ": " + numberOfCreeps[role]);
-        }
-        for (let roomName in numberOfLongDistanceHarvesters) {
-            console.log("LongDistanceHarvester" + roomName + ": " + numberOfLongDistanceHarvesters[roomName]);
         }
     }
 }
 
-StructureSpawn.prototype.createCustomCreep = function (roleName, target) {
-    let energy = this.room.energyAvailable;
-    // create a balanced body as big as possible with the given energy
-    var numberOfParts = Math.floor(energy / 200);
-    // make sure the creep is not too big (more than 50 parts)
-    numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
+StructureSpawn.prototype.spawnUpgrader = function(target, maxUpgraderParts){
+    const energy = this.room.energyAvailable;
+    let numberOfParts = Math.floor(energy / creepBodies.startUpgrader.cost);
+    numberOfParts = Math.min(numberOfParts, Math.floor(50/3));
     var body = [];
     for (let i = 0; i < numberOfParts; i++) {
-        body.push(WORK);
+        if(i > maxUpgraderParts){
+            break;
+        }
+        body.push(...creepBodies.startUpgrader.body.map(b => b));
     }
+    return this.spawnCreep(body, this.generateName('upgrader'), {memory: {role: 'upgrader', state: false, target: target, home: this.room.name}});
+
+}
+
+StructureSpawn.prototype.spawnBuilder = function(target, maxBuilderParts){
+    const energy = this.room.energyAvailable;
+    let numberOfParts = Math.floor(energy / creepBodies.startBuilder.cost);
+    numberOfParts = Math.min(numberOfParts, Math.floor(50/3));
+    var body = [];
     for (let i = 0; i < numberOfParts; i++) {
-        body.push(CARRY);
+        if(i > maxBuilderParts){
+            break;
+        }
+        body.push(...creepBodies.startBuilder.body.map(b => b));
     }
-    for (let i = 0; i < numberOfParts; i++) {
-        body.push(MOVE);
-    }
-    // create creep with the created body and the given role
-    return this.spawnCreep(body, this.generateName(roleName), {memory: {role: roleName, state: false, target: target, home: this.room.name}});
-};
+    return this.spawnCreep(body, this.generateName('builder'), {memory: {role: 'builder', state: false, target: target, home: this.room.name}});
+
+}
 
 StructureSpawn.prototype.createScout = function () {
     var body = [];
@@ -166,7 +110,49 @@ StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningW
         return this.spawnCreep(body, name,{memory: { role: 'miner', sourceId: sourceId, target: target, containerPos: sourceContainer, path: assignedPath }});
 };
 
-StructureSpawn.prototype.createAttacker = function (energy, roleName, home, target) {
+// create a new function for StructureSpawn
+StructureSpawn.prototype.createTransporter = function (energy, roleName, target, home, maxCarryParts) {
+    if(home === undefined){
+        home = this.room.name;
+    }
+    // create a body with twice as many CARRY as MOVE parts
+    var numberOfParts = Math.floor(energy / creepBodies.startHauler.cost);
+    // make sure the creep is not too big (more than 50 parts)
+    numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
+    var body = [];
+    for (let i = 0; i < numberOfParts; i++) {
+        if(i > maxCarryParts){
+            break;
+        }
+        body.push(...creepBodies.startHauler.body.map(b => b));
+    }
+    // create creep with the created body and the role 'lorry'
+    if(!_.isEmpty(body)){
+        return this.spawnCreep(
+            body, 
+            this.generateName(roleName), 
+            {memory: { 
+                role: roleName, 
+                state: false, 
+                target: target,
+                home: home }
+            });
+    } else{
+        return ERR_NOT_ENOUGH_ENERGY
+    }
+};
+
+StructureSpawn.prototype.createClaimer = function(target, roleName) {
+    return this.spawnCreep([CLAIM, MOVE], this.generateName(roleName), {memory: { role: roleName, target: target }});
+};
+
+
+StructureSpawn.prototype.generateName = function(roleName){
+    return roleName + '_' + Math.random().toString(36).slice(2, 7).toString();
+}
+
+/**
+ * StructureSpawn.prototype.createAttacker = function (energy, roleName, home, target) {
     // create a body with the specified number of WORK parts and one MOVE part per non-MOVE part
     var body = [];
             var numberOfParts = Math.floor(energy / 150);
@@ -229,46 +215,4 @@ StructureSpawn.prototype.createRangedFighter = function (energy, roleName, home,
         attackRoom: target,
         state: false}})
 };
-        
-
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createTransporter = function (energy, roleName, target, home) {
-    if(home === undefined){
-        home = this.room.name;
-    }
-    // create a body with twice as many CARRY as MOVE parts
-    var numberOfParts = Math.floor(energy / 150);
-    // make sure the creep is not too big (more than 50 parts)
-    numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
-    var body = [];
-    for (let i = 0; i < numberOfParts; i++) {
-        body.push(CARRY);
-    }
-    for (let i = 0; i < numberOfParts; i++) {
-        body.push(MOVE);
-    }
-    // create creep with the created body and the role 'lorry'
-    if(!_.isEmpty(body)){
-        return this.spawnCreep(
-            body, 
-            this.generateName(roleName), 
-            {memory: { 
-                role: roleName, 
-                state: false, 
-                target: target,
-                home: home }
-            });
-    } else{
-        return ERR_NOT_ENOUGH_ENERGY
-    }
-};
-
-StructureSpawn.prototype.createClaimer = function(target, roleName) {
-    return this.spawnCreep([CLAIM, MOVE], this.generateName(roleName), {memory: { role: roleName, target: target }});
-};
-
-
-StructureSpawn.prototype.generateName = function(roleName){
-    return roleName + '_' + Math.random().toString(36).slice(2, 7).toString();
-}
+ */

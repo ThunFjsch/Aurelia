@@ -2,17 +2,39 @@ Room.prototype.spawnManager = function(){
     if(this.memory.pickups != undefined && this.memory.dropOffs != undefined){
         const spawns = this.find(FIND_MY_SPAWNS);
         if(!_.isEmpty(spawns)){
-            
             for(let name in spawns){
+                let roomNetIncome = 0;
+                for(let name in Memory.sourceEco){
+                    let info = Memory.sourceEco[name];
+                    if(info.room === this.name){
+                        roomNetIncome += info.net;
+                    }
+                }
+
+                const constructionSites = this.find(FIND_CONSTRUCTION_SITES);
+                let upgraderParts = 0;
+                let builderParts = 0;
+                // allows for more precision for spawning upgraders. 
+                let diff = 2
+                if(_.isEmpty(constructionSites)){
+                    upgraderParts = Math.floor(roomNetIncome / diff);
+                } else {
+                    const minUpgraderParts = 2;
+                    builderParts = Math.floor((roomNetIncome - minUpgraderParts));
+                    upgraderParts = Math.floor(minUpgraderParts / diff);
+                }
                 let currentSpawn = spawns[name];
                 let spawnState;
-                //spawnState = this.isMinerNeeded(currentSpawn);
+                console.log(upgraderParts)
                 
                 if(spawnState === undefined){
-                    spawnState = this.isTransportNeeded(currentSpawn, currentSpawn.room.energyAvailable)
+                    spawnState = this.isTransportNeeded(currentSpawn, currentSpawn.room.energyAvailable);
                 }
                 if(spawnState === undefined){
-                    this.isBuilderNeeded(currentSpawn);
+                    this.isBuilderNeeded(currentSpawn, builderParts);
+                }
+                if(spawnState === undefined){
+                    this.isUpgraderNeeded(currentSpawn, upgraderParts);
                 }
             }
         } else if(this.memory.remoteMining.isMined === true && this.memory.remoteMining.assignedToo != undefined){            
@@ -38,19 +60,19 @@ Room.prototype.spawnManager = function(){
 }
 
 Room.prototype.isTransportNeeded = function(assignedSpawn, energyAvailable){
-    const transportRequests = Object.keys(this.memory.pickups).length;
-    let requiredTransports = Math.floor(transportRequests / 3);
-    let roomName = this.name;
-    let foo = _.map(Game.creeps, function(c){ return c.memory.role === 'transporter' && c.memory.target === roomName})
-    let transporterAssigned = 0;
-    for(let i = 0; i < foo.length; i++){
-        if(foo[i]){
-            transporterAssigned++;
+    const roomName = this.name;
+    const transportRequests = Math.ceil(Object.keys(this.memory.pickups).length * 0.2);
+    const haulers = _.map(Game.creeps, function(c){ return c.memory.role === 'transporter' && c.memory.target === roomName})
+    for(let i = 0; i < Memory.sourceEco.length; i++){
+        const info = Memory.sourceEco[i];
+        if(info.room === this.name){
+            const eco = Memory.sourceEco[i];
+            const currentCarry = this.getSpecificBodyPartCountForSource(haulers, 'transporter', CARRY, info.id);
+            if(currentCarry < (eco.carryParts + transportRequests)){
+                const neededCarry = Math.ceil(eco.carryParts - currentCarry);
+                assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name, this.name, neededCarry);
+            }
         }
-    }
-    
-    if(transporterAssigned < requiredTransports){
-        assignedSpawn.createTransporter(energyAvailable, 'transporter', this.name);
     }
 }
 
@@ -71,87 +93,31 @@ Room.prototype.remoteBuilderTransport = function(assignedSpawn, energyAvailable)
     }
 }
 
-Room.prototype.isBuilderNeeded = function(assignedSpawn){
-    const constructionSites = this.find(FIND_MY_CONSTRUCTION_SITES);
-    let requiredBuilder = 0;
-    if(constructionSites != undefined){
-        let totalConstructionProgress = 0;
-        for(let name in constructionSites){
-            totalConstructionProgress += constructionSites[name].progressTotal
-        }
-        if(totalConstructionProgress > 0){
-            requiredBuilder = Math.floor(totalConstructionProgress / 2000);
-        }
-        if(requiredBuilder > 5){
-            requiredBuilder = 5;
-        }
-    }
-
-    /// builder
-    let builderAssigned = numberOfBuilders(this.name);
-    if(builderAssigned < requiredBuilder){
-        assignedSpawn.createCustomCreep('builder', this.name);
+Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
+    let assignedWorkParts = assignedRoleWorkParts(this.name, 'upgrader');
+    if(assignedWorkParts < maxUpgraderParts){
+        assignedSpawn.spawnUpgrader(this.name, maxUpgraderParts);
     }
 }
 
-function numberOfBuilders(roomName){
-    let roomBuilders = _.map(Game.creeps, function(c){ return c.memory.role === 'builder' && c.memory.target === roomName})
-    let builderAssigned = 0;
+Room.prototype.isBuilderNeeded = function(assignedSpawn, maxBuilderParts){
+    let assignedWorkParts = assignedRoleWorkParts(this.name, 'builder');
+    if(assignedWorkParts < maxBuilderParts){
+        assignedSpawn.spawnBuilder(this.name, maxBuilderParts);
+    }
+}
+
+function assignedRoleWorkParts(roomName, role){
+    let roomBuilders = _.map(Game.creeps, function(c){ if(c.memory.role === role && c.memory.target === roomName){return c}})
+    let assignedWorkParts = 0;
     for(let i = 0; i < roomBuilders.length; i++){
-        if(roomBuilders[i]){
-            builderAssigned++;
-        }
-    }
-    return builderAssigned
-}
-
-Room.prototype.isMinerNeeded = function(assignedSpawn){
-    let roomName = this.name;
-    const miners = _.map(Game.creeps, function(c){ if(c.memory.role === 'miner' && c.memory.target === roomName){return c}})
-    let name;
-    for(let i = 0; i < this.memory.remoteMining.sources.length; i++){
-            name = this.spawnForSource(this.memory.remoteMining.sources[i], miners, assignedSpawn);
-    }
-    return name;
-}
-
-
-Room.prototype.spawnForSource = function(source, miners, assignedSpawn){
-    let currentWorkParts = this.getSpecificBodyPartCountForSource(miners, 'miner', WORK, source);
-        const miningWorkParts = Math.ceil((source.energyCapacity / 300) / 2);
-        let workersAssignToSource = 0;
-        
-        for(let i = 0; i < miners.length; i++){
-            if(miners[i] != undefined && miners[i].memory.sourceId === source.id){
-                workersAssignToSource++;
-            }
-        }
-        if(workersAssignToSource < source.avialableSpots && currentWorkParts < miningWorkParts){
-            // container block auslagern wegen remote mining
-            let containers = this.memory.containers
-            let containerNearSource = false;
-            let sourceContainer;
-            if(containers != undefined){
-                for(let name in containers){
-                    let container = Game.getObjectById(containers[name].id);
-                    if(container != null && container.pos.inRangeTo(source.pos.x, source.pos.y, 1, source) === true){
-                        
-                        containerNearSource = container.pos.inRangeTo(container.pos.x, container.pos.y, 1, source);
-                        sourceContainer = container.pos;
-                    }
+        if(roomBuilders[i] != null && roomBuilders[i] != undefined){
+            for(let j = 0; i < roomBuilders[i].body.length; i++){
+                if(roomBuilders.body[j] === WORK){
+                    assignedWorkParts++;
                 }
             }
-            let energy = 0;
-            if(workersAssignToSource != undefined){
-                if(containerNearSource === true && workersAssignToSource >= 1){
-                    console.log('should abort')
-                    return 'source has container and miner';
-                }
-                energy = assignedSpawn.room.energyAvailable;
-            } else if(containerNearSource === true){
-                energy = assignedSpawn.room.energyAvailable;
-            } else{
-                energy = assignedSpawn.room.energyAvailable;
-            }
-            return assignedSpawn.spawnMiner(energy, source.id, this.name, miningWorkParts, 1, sourceContainer);
-} }
+        }
+    }
+    return assignedWorkParts;
+}

@@ -139,7 +139,7 @@ module.exports = {
         Memory.sourceInfo.sources.push(newSource);
     },
 
-    spawnForSources: function(){
+    spawnMinerForSources: function(){
        if(Memory.sourceInfo != undefined){
             for(let index in Memory.sourceInfo.sources){
                 const source = Memory.sourceInfo.sources[index]
@@ -191,8 +191,6 @@ module.exports = {
                         if(source.miningSpots[spot].isAssigned){
                             const mineSpot = source.miningSpots[spot];
                             const assignedCreep = mineSpot.assignee;
-                            console.log('foo')
-                            console.log(Game.creeps[assignedCreep] === undefined)
                             if(assignedCreep != undefined && Game.creeps[assignedCreep] === undefined){
                                 mineSpot.isAssigned = false;
                                 delete mineSpot.assignee;

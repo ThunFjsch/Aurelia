@@ -4,6 +4,7 @@ require('prototype.tower');
 require('prototype.creep');
 const sourceManager = require('sourceManager');
 const profiler = require('screeps-profiler');
+const eco = require('ecoCalculator');
 
 // This line monkey patches the global prototypes
 //profiler.enable();
@@ -29,7 +30,7 @@ module.exports.loop = function () {
         if(Memory.sourceInfo === undefined){
             sourceManager.init();
         } else{
-            sourceManager.spawnForSources();
+            sourceManager.spawnMinerForSources();
         }
         
         for(let room in Memory.rooms){
@@ -46,6 +47,24 @@ module.exports.loop = function () {
         for (let name in Game.creeps) {
             // run creep logic
             Game.creeps[name].runRole();
+        }
+
+        if(Game.time % 32){
+            eco.theoNetIndome();
+        }
+
+        // currently displays some eco info. Will be handled better
+        if(Memory.sourceEco != undefined){
+            let totalNetincome = 0;
+            let totalCarry = 0;
+            for(let i = 0; i < Memory.sourceEco.length; i++){
+                const info = Memory.sourceEco[i];
+                totalNetincome += info.net;
+                totalCarry += info.carryParts;
+                new RoomVisual(info.room).text(`Room: ${info.room} | Netincome: ${info.net} | CarryParts: ${info.carryParts}`, 10, 15 + i, {color: 'green', font: 0.8});  
+            }
+            console.log('total net income: ' + totalNetincome);
+            console.log('total carry: ' + totalCarry);
         }
     //});
 }
