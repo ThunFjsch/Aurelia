@@ -15,13 +15,13 @@ Room.prototype.spawnManager = function(){
                 let upgraderParts = 0;
                 let builderParts = 0;
                 // allows for more precision for spawning upgraders. 
-                let diff = 2
+                let diff = 1.3;
                 if(_.isEmpty(constructionSites)){
-                    upgraderParts = Math.floor(roomNetIncome / diff);
+                    upgraderParts = Math.floor(roomNetIncome * diff);
                 } else {
                     const minUpgraderParts = 2;
                     builderParts = Math.floor((roomNetIncome - minUpgraderParts));
-                    upgraderParts = Math.floor(minUpgraderParts / diff);
+                    upgraderParts = Math.floor(minUpgraderParts * diff);
                 }
                 let currentSpawn = spawns[name];
                 let spawnState;
@@ -112,8 +112,8 @@ function assignedRoleWorkParts(roomName, role){
     let assignedWorkParts = 0;
     for(let i = 0; i < roomBuilders.length; i++){
         if(roomBuilders[i] != null && roomBuilders[i] != undefined){
-            for(let j = 0; i < roomBuilders[i].body.length; i++){
-                if(roomBuilders.body[j] === WORK){
+            for(let j = 0; j < roomBuilders[i].body.length; j++){
+                if(roomBuilders[i].body[j] != undefined &&roomBuilders[i].body[j].type === WORK){
                     assignedWorkParts++;
                 }
             }

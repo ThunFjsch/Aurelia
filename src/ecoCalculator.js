@@ -27,7 +27,7 @@ module.exports = {
                     const travelTime = CREEP_LIFE_TIME - pathCost; 
                     const minerCost = roi / travelTime;
                     
-                    const neededCarry = EperTick * 14 * pathCost / CARRY_CAPACITY;
+                    const neededCarry = EperTick * 22 * pathCost / CARRY_CAPACITY;
                     const haulerCost = neededCarry * pathCost / CREEP_LIFE_TIME;
 
                     // TODO: Add container Upkeep and when needed Claimer Cost
