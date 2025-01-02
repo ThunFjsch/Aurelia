@@ -2,6 +2,8 @@ require('prototype.room.jobManager');
 require('prototype.room.remoteMining');
 require('prototype.room.spawnManager');
 
+const plannerUpgraderLocation = require('planner.upgradeLocation');
+
 let containerMemmory = {
     id: undefined,
     stored: 0
@@ -18,6 +20,13 @@ Room.prototype.roomManager = function(){
         this.spawnManager();
         this.remoteMining();
     }
+    
+    //new RoomVisual(this.name).rect(this.controller.pos.x - 3.5, this.controller.pos.y - 3.5, 7, 7)
+    if(this.memory.upgraderInfo === undefined){
+            plannerUpgraderLocation.createUpgradeLocations(this.name);
+        } else{
+            plannerUpgraderLocation.visualiseUpgraderSpots(this.name);
+        }
 }
 
 Room.prototype.getSpecificBodyPartCountForSource = function(creeps, role, bodyPart, source){

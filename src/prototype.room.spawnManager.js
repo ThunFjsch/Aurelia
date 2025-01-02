@@ -2,6 +2,10 @@ Room.prototype.spawnManager = function(){
     if(this.memory.pickups != undefined && this.memory.dropOffs != undefined){
         const spawns = this.find(FIND_MY_SPAWNS);
         if(!_.isEmpty(spawns)){
+            
+            
+    
+ 
             for(let name in spawns){
                 let roomNetIncome = 0;
                 for(let name in Memory.sourceEco){
@@ -12,6 +16,9 @@ Room.prototype.spawnManager = function(){
                 }
 
                 const constructionSites = this.find(FIND_CONSTRUCTION_SITES);
+                const hasMiner = !_.isEmpty(this.find(FIND_MY_CREEPS, {
+                    filter:(c) => c.memory.role === 'miner'
+                }))
                 let upgraderParts = 0;
                 let builderParts = 0;
                 // allows for more precision for spawning upgraders. 
@@ -27,13 +34,13 @@ Room.prototype.spawnManager = function(){
                 let spawnState;
                 console.log(upgraderParts)
                 
-                if(spawnState === undefined){
+                if(spawnState === undefined && hasMiner){
                     spawnState = this.isTransportNeeded(currentSpawn, currentSpawn.room.energyAvailable);
                 }
-                if(spawnState === undefined){
+                if(spawnState === undefined && hasMiner){
                     this.isBuilderNeeded(currentSpawn, builderParts);
                 }
-                if(spawnState === undefined){
+                if(spawnState === undefined && hasMiner){
                     this.isUpgraderNeeded(currentSpawn, upgraderParts);
                 }
             }
@@ -45,13 +52,13 @@ Room.prototype.spawnManager = function(){
             if(hasMiners){
                 const energyAvailable = assignedSpawn.room.energyAvailable;
                 let spawnState; //this.isMinerNeeded(assignedSpawn);
-                if(spawnState === undefined){
+                if(spawnState === undefined && hasMiner){
                     this.isTransportNeeded(assignedSpawn, energyAvailable)
                 }
-                if(spawnState === undefined){
+                if(spawnState === undefined && hasMiner){
                     this.isBuilderNeeded(assignedSpawn);
                 }
-                if(spawnState === undefined){
+                if(spawnState === undefined && hasMiner){
                     this.remoteBuilderTransport(assignedSpawn, energyAvailable)
                 }
             }
