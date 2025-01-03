@@ -115,7 +115,7 @@ Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
                 const assignedCreep = upgraderSpot.assignee;
                 if(assignedCreep != undefined && Game.creeps[assignedCreep] === undefined){
                     upgraderSpot.isAssigned = false;
-                    delete mineSpot.assignee;
+                    delete this.memory.upgraderInfo.spots[assignedSpot].assignee
                 }
             }
         }
@@ -131,10 +131,10 @@ Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
         if(assignedPath != undefined){
             const spawn = this.find(FIND_MY_SPAWNS)[0];
             const name =  spawn.generateName('upgrader');
-            let foo = spawn.spawnUpgrader(this.name, maxUpgraderParts, {path: assignedPath, targetSpot: assignedSpot});
+            let foo = spawn.spawnUpgrader(this.name, maxUpgraderParts, {path: assignedPath, targetSpot: this.memory.upgraderInfo.spots[assignedSpot]});
             if(foo === OK){
-                this.memory.upgraderInfo[assignedSpot].isAssigned = true;
-                this.memory.upgraderInfo[assignedSpot].assignee = name;
+                this.memory.upgraderInfo.spots[assignedSpot].isAssigned = true;
+                this.memory.upgraderInfo.spots[assignedSpot].assignee = name;
             }
         }
     }
