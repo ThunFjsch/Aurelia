@@ -51,7 +51,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     }
 }
 
-StructureSpawn.prototype.spawnUpgrader = function(target, maxUpgraderParts){
+StructureSpawn.prototype.spawnUpgrader = function(target, maxUpgraderParts, spotInfo){
     const energy = this.room.energyAvailable;
     let numberOfParts = Math.floor(energy / creepBodies.startUpgrader.cost);
     numberOfParts = Math.min(numberOfParts, Math.floor(50/3));
@@ -62,7 +62,7 @@ StructureSpawn.prototype.spawnUpgrader = function(target, maxUpgraderParts){
         }
         body.push(...creepBodies.startUpgrader.body.map(b => b));
     }
-    return this.spawnCreep(body, this.generateName('upgrader'), {memory: {role: 'upgrader', state: false, target: target, home: this.room.name}});
+    return this.spawnCreep(body, this.generateName('upgrader'), {memory: {role: 'upgrader', state: false, target: target, home: this.room.name, spot: spotInfo}});
 
 }
 
