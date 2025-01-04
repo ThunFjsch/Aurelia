@@ -102,6 +102,7 @@ Room.prototype.remoteBuilderTransport = function(assignedSpawn, energyAvailable)
 
 Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
     let assignedWorkParts = assignedRoleWorkParts(this.name, 'upgrader');
+    console.log('w'+assignedWorkParts)
     if(assignedWorkParts < maxUpgraderParts){
         let assignedPath;
         let assignedSpot;
@@ -111,11 +112,10 @@ Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
         }
         for(let spot in  spots){
             if(spots[spot].isAssigned){
-                const upgraderSpot = spots[spot];
-                const assignedCreep = upgraderSpot.assignee;
+                const assignedCreep = spots[spot].assignee;
                 if(assignedCreep != undefined && Game.creeps[assignedCreep] === undefined){
-                    upgraderSpot.isAssigned = false;
-                    delete this.memory.upgraderInfo.spots[assignedSpot].assignee
+                    this.memory.upgraderInfo.spots[spot].isAssigned = false
+                    delete this.memory.upgraderInfo.spots[spot].assignee
                 }
             }
         }
@@ -131,7 +131,7 @@ Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
         if(assignedPath != undefined){
             const spawn = this.find(FIND_MY_SPAWNS)[0];
             const name =  spawn.generateName('upgrader');
-            let foo = spawn.spawnUpgrader(this.name, maxUpgraderParts, {path: assignedPath, targetSpot: this.memory.upgraderInfo.spots[assignedSpot]});
+            let foo = spawn.spawnUpgrader(this.name, name, maxUpgraderParts, {path: assignedPath, targetSpot: this.memory.upgraderInfo.spots[assignedSpot]});
             if(foo === OK){
                 this.memory.upgraderInfo.spots[assignedSpot].isAssigned = true;
                 this.memory.upgraderInfo.spots[assignedSpot].assignee = name;

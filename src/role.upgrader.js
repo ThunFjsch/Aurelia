@@ -3,7 +3,7 @@ module.exports = {
     run: function(creep) {
         if(creep.memory.spot != undefined){
             let path = creep.memory.spot.path.path;
-            if(path.length < 1 || path[0] === null){
+            if(_.isEmpty(path) || path[0] === null){
                 creep.upgradeController(creep.room.controller)
                 return;
             }
