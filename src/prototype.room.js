@@ -1,5 +1,4 @@
 require('prototype.room.jobManager');
-require('prototype.room.remoteMining');
 require('prototype.room.spawnManager');
 
 const plannerUpgraderLocation = require('planner.upgradeLocation');
@@ -18,7 +17,6 @@ Room.prototype.roomManager = function(){
         this.memory.lastExecution = currentTick;
         this.jobManager();
         this.spawnManager();
-        this.remoteMining();
     }
     
     //new RoomVisual(this.name).rect(this.controller.pos.x - 3.5, this.controller.pos.y - 3.5, 7, 7)

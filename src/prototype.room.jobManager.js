@@ -1,81 +1,55 @@
 Room.prototype.jobManager = function(){
-        const containers = this.find(FIND_STRUCTURES, {
-            filter: (s) => s.structureType == STRUCTURE_CONTAINER
-        });
-        const droppedEnergy = this.find(FIND_DROPPED_RESOURCES, {
-            filter: (e) => e.resourceType === RESOURCE_ENERGY
-        });
-        
-        // creates new pick up requests
-        if(droppedEnergy != undefined){
-            for(let index in droppedEnergy){
-                let drop = droppedEnergy[index];
-                this.generateDeletePickUpRequest(drop.amount, drop.id)
-            }
-        }
-        if(containers != undefined){
-            this.generateContainerPickUps(containers);
-        }
-        
-        // creates drop off requests
-        const towers = this.find(FIND_MY_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_TOWER
-        });
-        if(towers != undefined){
-            this.manageDropOffs(towers);
-        }
-        
-        const workerCreeps = this.find(FIND_MY_CREEPS, {
-            filter: (c) => (c.memory.role === 'builder' || 
-                           c.memory.role === 'upgrader' || 
-                           c.memory.role === 'maintainer' || 
-                           c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
-        });
-        if(workerCreeps != undefined){
-            this.manageDropOffs(workerCreeps);
-        }
-        
-        const extensions = this.find(FIND_MY_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_EXTENSION
-        });
-        if(extensions != undefined){
-            this.manageDropOffs(extensions);
-        }
-
-        const roomSpawns = this.find(FIND_MY_SPAWNS, {
-            filter: (s) => s.store.getCapacity(RESOURCE_ENERGY)
-        });
-        if(roomSpawns != undefined){
-            this.manageDropOffs(roomSpawns);
-        }
-        
-        const roomStorage = this.find(FIND_MY_STRUCTURES, {
-            filter: (s) => s.structureType === STRUCTURE_STORAGE
-        });
-        if(roomStorage != undefined){
-            this.manageDropOffs(roomStorage);
+    const droppedEnergy = this.find(FIND_DROPPED_RESOURCES, {
+        filter: (e) => e.resourceType === RESOURCE_ENERGY
+    });
+    
+    // creates new pick up requests
+    if(droppedEnergy != undefined){
+        for(let index in droppedEnergy){
+            let drop = droppedEnergy[index];
+            this.generateDeletePickUpRequest(drop.amount, drop.id)
         }
     }
-
-Room.prototype.generateContainerPickUps = function(containers){
-    for(let index in containers){
-        let container = containers[index];
-        
-        // If container Memory entry doesent exist, 
-        if(this.memory.containers === undefined){
-            this.memory.containers = {};
-        }
-        // if container entries doesent exist, add them
-        else if (this.memory.containers[container] === undefined){
-            const containerMemory = {id: container.id, stored: container.store.getUsedCapacity(RESOURCE_ENERGY)};
-            this.memory.containers[container] = containerMemory;
-        }
-        // Manage container PickUp requests
-        else{
-            this.generateDeletePickUpRequest(container.store.getUsedCapacity(RESOURCE_ENERGY), container.id);
-        }   
+    
+    // creates drop off requests
+    const towers = this.find(FIND_MY_STRUCTURES, {
+        filter: (s) => s.structureType === STRUCTURE_TOWER
+    });
+    if(towers != undefined){
+        this.manageDropOffs(towers);
+    }
+    
+    const workerCreeps = this.find(FIND_MY_CREEPS, {
+        filter: (c) => (c.memory.role === 'builder' || 
+                       c.memory.role === 'upgrader' || 
+                       c.memory.role === 'maintainer' || 
+                       c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
+    });
+    if(workerCreeps != undefined){
+        this.manageDropOffs(workerCreeps);
+    }
+    
+    const extensions = this.find(FIND_MY_STRUCTURES, {
+        filter: (s) => s.structureType === STRUCTURE_EXTENSION
+    });
+    if(extensions != undefined){
+        this.manageDropOffs(extensions);
+    }
+    const roomSpawns = this.find(FIND_MY_SPAWNS, {
+        filter: (s) => s.store.getCapacity(RESOURCE_ENERGY)
+    });
+    if(roomSpawns != undefined){
+        this.manageDropOffs(roomSpawns);
+    }
+    
+    const roomStorage = this.find(FIND_MY_STRUCTURES, {
+        filter: (s) => s.structureType === STRUCTURE_STORAGE
+    });
+    if(roomStorage != undefined){
+        this.manageDropOffs(roomStorage);
     }
 }
+
 
 Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId){
     // Each transport can carry 100E so for each 100E one pickUp requests gets generated
@@ -150,7 +124,6 @@ Room.prototype.manageDropOffs = function(dropOffTargets){
     if(this.memory.dropOffs === undefined) {
         this.memory.dropOffs = {};
     } else{
-        
         for(let index in dropOffTargets){
             const target = dropOffTargets[index];
             if(target.store.getUsedCapacity(RESOURCE_ENERGY) < target.store.getCapacity(RESOURCE_ENERGY)){

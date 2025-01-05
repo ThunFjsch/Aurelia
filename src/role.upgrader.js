@@ -4,8 +4,9 @@ module.exports = {
         if(creep.memory.spot != undefined){
             let path = creep.memory.spot.path.path;
             let spot = creep.memory.spot.path;
-            if(_.isEmpty(path) || path[0] === null){
+            if(creep.pos.x === spot.x && creep.pos.y === spot.y){
                 creep.upgradeController(creep.room.controller)
+                creep.giveWay();
                 return;
             }
             if(path[0] === undefined){

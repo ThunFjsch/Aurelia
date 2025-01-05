@@ -44,24 +44,6 @@ Room.prototype.spawnManager = function(){
                     this.isUpgraderNeeded(currentSpawn, upgraderParts);
                 }
             }
-        } else if(this.memory.remoteMining.isMined === true && this.memory.remoteMining.assignedToo != undefined){            
-            const assignedSpawn = Game.rooms[this.memory.remoteMining.assignedToo].find(FIND_MY_SPAWNS)[0];
-            const hasMiners = !_.isEmpty(Game.rooms[this.memory.remoteMining.assignedToo].find(FIND_MY_CREEPS, {
-                 filter: (c) =>  c.memory.role === 'miner'
-            }));
-            if(hasMiners){
-                const energyAvailable = assignedSpawn.room.energyAvailable;
-                let spawnState; //this.isMinerNeeded(assignedSpawn);
-                if(spawnState === undefined && hasMiner){
-                    this.isTransportNeeded(assignedSpawn, energyAvailable)
-                }
-                if(spawnState === undefined && hasMiner){
-                    this.isBuilderNeeded(assignedSpawn);
-                }
-                if(spawnState === undefined && hasMiner){
-                    this.remoteBuilderTransport(assignedSpawn, energyAvailable)
-                }
-            }
         }
     }
 }
@@ -151,10 +133,11 @@ Room.prototype.isMaintainerNeeded = function(assignedSpawn){
         let sum = toRepair[i].hitsMax - toRepair[i].hits;
         totalHitsToRepair += sum;
     }
-    if(totalHitsToRepair >= 75000){
+    if(totalHitsToRepair >= 150000){
         const memory = {role: 'maintainer', state: false, target: this.name};
-        return spawnState = assignedSpawn.generalCreep(this.name,'maintainer', 2, creepBodies.startBuilder, memory);
+        return spawnState = assignedSpawn.generalCreep(this.name,'maintainer', 1, creepBodies.startBuilder, memory);
     }
+    console.log(totalHitsToRepair)
 }
 
 Room.prototype.isBuilderNeeded = function(assignedSpawn, maxBuilderParts){

@@ -6,8 +6,7 @@ module.exports = {
             let spot = creep.memory.path;
             if(creep.pos.x === spot.x && creep.pos.y === spot.y){
                 creep.harvest(Game.getObjectById(creep.memory.sourceId));
-                
-            creep.giveWay();
+                creep.giveWay();
                 return;
             }
             if(path[0] === undefined){
