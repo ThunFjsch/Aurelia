@@ -51,6 +51,21 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     }
 }
 
+StructureSpawn.prototype.generalCreep = function(target, role, maxParts, bodyBluePrint, predefinedMemory){
+    const energy = this.room.energyAvailable;
+    let numberOfParts = Math.floor(energy / bodyBluePrint.cost);
+    numberOfParts = Math.min(numberOfParts, Math.floor(50/3));
+    let body = [];
+    for (let i = 0; i < numberOfParts; i++) {
+        if(i > maxParts){
+            break;
+        }
+        body.push(...bodyBluePrint.body.map(b => b));
+    }
+    return this.spawnCreep(body, this.generateName(role), {memory: predefinedMemory});
+
+}
+
 StructureSpawn.prototype.spawnUpgrader = function(target, name, maxUpgraderParts, spotInfo){
     const energy = this.room.energyAvailable;
     let numberOfParts = Math.floor(energy / creepBodies.startUpgrader.cost);
@@ -66,20 +81,6 @@ StructureSpawn.prototype.spawnUpgrader = function(target, name, maxUpgraderParts
 
 }
 
-StructureSpawn.prototype.spawnBuilder = function(target, maxBuilderParts){
-    const energy = this.room.energyAvailable;
-    let numberOfParts = Math.floor(energy / creepBodies.startBuilder.cost);
-    numberOfParts = Math.min(numberOfParts, Math.floor(50/3));
-    var body = [];
-    for (let i = 0; i < numberOfParts; i++) {
-        if(i > maxBuilderParts){
-            break;
-        }
-        body.push(...creepBodies.startBuilder.body.map(b => b));
-    }
-    return this.spawnCreep(body, this.generateName('builder'), {memory: {role: 'builder', state: false, target: target, home: this.room.name}});
-
-}
 
 StructureSpawn.prototype.createScout = function () {
     var body = [];

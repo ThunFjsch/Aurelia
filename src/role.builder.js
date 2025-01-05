@@ -12,6 +12,7 @@ var roleBuilder = {
                 }// else {
                    // creep.moveTo(constructionSite, {avoid: creep.room.find(FIND_CONSTRUCTION_SITES), visualizePathStyle: {stroke: '#ffffff'}});
                 //}
+                creep.giveWay();
             } else{
                 roleUpgrader.run(creep);
             }

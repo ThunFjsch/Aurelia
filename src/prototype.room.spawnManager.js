@@ -1,11 +1,9 @@
+const creepBodies = require('creep.body');
+
 Room.prototype.spawnManager = function(){
     if(this.memory.pickups != undefined && this.memory.dropOffs != undefined){
         const spawns = this.find(FIND_MY_SPAWNS);
         if(!_.isEmpty(spawns)){
-            
-            
-    
- 
             for(let name in spawns){
                 let roomNetIncome = 0;
                 for(let name in Memory.sourceEco){
@@ -32,8 +30,10 @@ Room.prototype.spawnManager = function(){
                 }
                 let currentSpawn = spawns[name];
                 let spawnState;
-                console.log(upgraderParts)
                 
+                if(spawnState === undefined && hasMiner){
+                    spawnState = this.isMaintainerNeeded(currentSpawn);
+                }
                 if(spawnState === undefined && hasMiner){
                     spawnState = this.isTransportNeeded(currentSpawn, currentSpawn.room.energyAvailable);
                 }
@@ -102,7 +102,6 @@ Room.prototype.remoteBuilderTransport = function(assignedSpawn, energyAvailable)
 
 Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
     let assignedWorkParts = assignedRoleWorkParts(this.name, 'upgrader');
-    console.log('w'+assignedWorkParts)
     if(assignedWorkParts < maxUpgraderParts){
         let assignedPath;
         let assignedSpot;
@@ -140,10 +139,29 @@ Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
     }
 }
 
+Room.prototype.isMaintainerNeeded = function(assignedSpawn){
+    const toRepair = this.find(FIND_STRUCTURES, {
+                        filter: (s) =>  s.hits < s.hitsMax
+    });
+    if(toRepair === undefined){
+        return;
+    }
+    let totalHitsToRepair = 0;
+    for(let i = 0; i < toRepair.length; i++){
+        let sum = toRepair[i].hitsMax - toRepair[i].hits;
+        totalHitsToRepair += sum;
+    }
+    if(totalHitsToRepair >= 75000){
+        const memory = {role: 'maintainer', state: false, target: this.name};
+        return spawnState = assignedSpawn.generalCreep(this.name,'maintainer', 2, creepBodies.startBuilder, memory);
+    }
+}
+
 Room.prototype.isBuilderNeeded = function(assignedSpawn, maxBuilderParts){
     let assignedWorkParts = assignedRoleWorkParts(this.name, 'builder');
     if(assignedWorkParts < maxBuilderParts){
-        assignedSpawn.spawnBuilder(this.name, maxBuilderParts);
+        const memory = {role: 'builder', target: this.name};
+        return assignedSpawn.generalCreep(this.name,'builder', maxBuilderParts, creepBodies.startBuilder, memory);
     }
 }
 
