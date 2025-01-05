@@ -17,6 +17,7 @@ var roleScout = {
             // delete creep.memory.dropOff;
             var exit = creep.room.findExitTo(creep.memory.target);
             creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#ffffff'}});
+            creep.giveWay();
             }
         }
     }

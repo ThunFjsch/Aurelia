@@ -9,9 +9,9 @@ var roleBuilder = {
             if(constructionSite != undefined) {
                 if(creep.build(constructionSite) === ERR_NOT_IN_RANGE){
                     creep.moveTo(constructionSite, {visualizePathStyle: {stroke: '#ffffff'}});
-                } else {
-                    creep.moveTo(constructionSite, {visualizePathStyle: {stroke: '#ffffff'}});
-                }
+                }// else {
+                   // creep.moveTo(constructionSite, {avoid: creep.room.find(FIND_CONSTRUCTION_SITES), visualizePathStyle: {stroke: '#ffffff'}});
+                //}
             } else{
                 roleUpgrader.run(creep);
             }
@@ -20,6 +20,7 @@ var roleBuilder = {
             var exit = creep.room.findExitTo(creep.memory.target);
             creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#ffffff'}});
             }
+            creep.giveWay();
         }
     }
 }

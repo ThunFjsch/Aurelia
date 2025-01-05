@@ -26,6 +26,7 @@ module.exports = {
                     // move towards it
                     creep.moveTo(structure);
                 }
+                creep.giveWay();
             }
             // if we can't fine one
             else {  
@@ -36,6 +37,7 @@ module.exports = {
         // if creep is supposed to harvest energy from source
         else {
             creep.getEnergy(false);
+            creep.giveWay();
         }
     }
 };

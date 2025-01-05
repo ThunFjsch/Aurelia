@@ -4,18 +4,23 @@ module.exports = {
             if(creep.memory.path != undefined){
             let path = creep.memory.path.path;
             let spot = creep.memory.path;
-            if(path.length < 1 || path[0] === null){
+            if(creep.pos.x === spot.x && creep.pos.y === spot.y){
                 creep.harvest(Game.getObjectById(creep.memory.sourceId));
+                
                 return;
             }
-            if(creep.pos.x === path[0].x && creep.pos.y === path[0].y){
+            if(path[0] === undefined){
+                creep.moveTo(spot.x, spot.y);
+            } else if(creep.pos.x === path[0].x && creep.pos.y === path[0].y){
                 creep.memory.path.path.shift();
             }
+            
             if(creep.moveByPath(path) === ERR_NOT_FOUND){
-                if(path[0] != undefined){
+                if(!_.isEmpty(path)){
                     creep.moveTo(path[0].x, path[0].y, { visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }
+            creep.giveWay();
             
             /*
             new RoomVisual(creep.room.name).line(spot.x, spot.y, creep.pos.x, creep.pos.y)

@@ -28,7 +28,8 @@ module.exports = {
             if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(claimerSpot.x, claimerSpot.y,  {visualizePathStyle: {stroke: '#ffaa00'}, ignoreDestructibleStructures: false, maxOps: 10000});
             }
-            creep.signController(creep.room.controller, 'Bob Bobbington')
+            creep.signController(creep.room.controller, 'Bob Bobbington');
         }
+        creep.giveWay();
     }
 };

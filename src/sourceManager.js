@@ -242,7 +242,6 @@ function createPathToMiningSpot(fromPos, toPos, miningSpots, currentSpot) {
     [fromPos.roomName]: true,
   };
 
-  PathFinder.use(true);
   let route = Game.map.findRoute(fromPos.roomName, toPos.roomName, {
     routeCallback(roomName) {
       let parsed = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName);
@@ -298,10 +297,23 @@ function createPathToMiningSpot(fromPos, toPos, miningSpots, currentSpot) {
         }
       });
       
+      room.find(FIND_CONSTRUCTION_SITES).forEach(function (structure) {
+        if (structure.structureType === STRUCTURE_ROAD) {
+          // Favor roads over plain tiles
+          costs.set(structure.pos.x, structure.pos.y, 1);
+        } else if (
+          structure.structureType !== STRUCTURE_CONTAINER &&
+          (structure.structureType !== STRUCTURE_RAMPART || !structure.my)
+        ) {
+          // Can't walk through non-walkable buildings
+          costs.set(structure.pos.x, structure.pos.y, 0xff);
+        }
+      });
+      
       for(let spot in miningSpots){
         spotPos = miningSpots[spot];
         if(currentSpot.x != spotPos.x && currentSpot.y != spotPos.y){
-            costs.set(spotPos.x, spotPos.y, 10);
+            costs.set(spotPos.x, spotPos.y, 0xff);
         }
       }
       

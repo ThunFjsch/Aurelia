@@ -34,13 +34,14 @@ module.exports = {
                     creep.moveTo(target);
                 }
             } else{
-                
                 roleMaintainer.run(creep);
             }
+            creep.giveWay();
         } 
         // if creep is supposed to harvest energy from source
         else {
             creep.getEnergy(false);
+            creep.giveWay();
         }
     }
 };
