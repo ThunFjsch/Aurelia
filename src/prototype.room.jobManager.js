@@ -2,7 +2,6 @@ Room.prototype.jobManager = function(){
     const droppedEnergy = this.find(FIND_DROPPED_RESOURCES, {
         filter: (e) => e.resourceType === RESOURCE_ENERGY
     });
-    
     // creates new pick up requests
     if(droppedEnergy != undefined){
         for(let index in droppedEnergy){
@@ -10,6 +9,29 @@ Room.prototype.jobManager = function(){
             this.generateDeletePickUpRequest(drop.amount, drop.id)
         }
     }
+    
+    const containers = this.memory.containers;
+    let upgradeContainer = false;
+    let fillerContiainer = false;
+
+    if(containers != undefined){
+        let dropOffContainer = []
+        for(let i =0; i < containers.length; i++){
+            const container = containers[i];
+            if(container.type === 'dropper'){
+                const structure = Game.getObjectById(container.id);
+                this.generateDeletePickUpRequest(structure.store.getUsedCapacity(RESOURCE_ENERGY), structure.id)
+            } else if(container.type === 'filler'){
+                fillerContiainer = true;
+                dropOffContainer.push(Game.getObjectById(container.id))
+            } else if(container.type === 'upgrade'){
+                upgraderContainer = true;
+                dropOffContainer.push(Game.getObjectById(container.id))
+            } 
+        }
+        this.manageDropOffs(dropOffContainer)
+    }
+    
     
     // creates drop off requests
     const towers = this.find(FIND_MY_STRUCTURES, {
@@ -19,12 +41,21 @@ Room.prototype.jobManager = function(){
         this.manageDropOffs(towers);
     }
     
-    const workerCreeps = this.find(FIND_MY_CREEPS, {
-        filter: (c) => (c.memory.role === 'builder' || 
-                       c.memory.role === 'upgrader' || 
-                       c.memory.role === 'maintainer' || 
-                       c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
-    });
+    let workerCreeps;
+    if(upgradeContainer){
+        this.find(FIND_MY_CREEPS, {
+            filter: (c) => (c.memory.role === 'builder' || 
+                        c.memory.role === 'maintainer' || 
+                        c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
+        });
+    } else {
+        this.find(FIND_MY_CREEPS, {
+            filter: (c) => (c.memory.role === 'builder' || 
+                        c.memory.role === 'maintainer' || 
+                        c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
+        });
+    }
+
     if(workerCreeps != undefined){
         this.manageDropOffs(workerCreeps);
     }
@@ -35,6 +66,7 @@ Room.prototype.jobManager = function(){
     if(extensions != undefined){
         this.manageDropOffs(extensions);
     }
+
     const roomSpawns = this.find(FIND_MY_SPAWNS, {
         filter: (s) => s.store.getCapacity(RESOURCE_ENERGY)
     });
@@ -60,7 +92,7 @@ Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId
         this.memory.pickups = {};
         this.generatePickUp(targetId, pickUpRequests);
     } 
-    // Create and delete container jobs
+    // Create and delete pickUp jobs
     else {
         let currentPickUpRequests = this.getCurrentPickUps(targetId);
         // if current Requests are not enough create new ones
@@ -126,39 +158,46 @@ Room.prototype.manageDropOffs = function(dropOffTargets){
     } else{
         for(let index in dropOffTargets){
             const target = dropOffTargets[index];
-            if(target.store.getUsedCapacity(RESOURCE_ENERGY) < target.store.getCapacity(RESOURCE_ENERGY)){
-                this.generateDropOff(target);
+            const usedSpace = target.store.getUsedCapacity(RESOURCE_ENERGY);
+            const totalSpace = target.store.getCapacity(RESOURCE_ENERGY);
+            if(usedSpace < totalSpace){
+                let targetDropOffs = (totalSpace - usedSpace) % CARRY_CAPACITY;
+                if(targetDropOffs < 5){
+                    targetDropOffs = 5;
+                }
+                this.generateDropOff(target, targetDropOffs);
             }
         }
     }
 }
 
-Room.prototype.generateDropOff = function (target){
-    let hasJob = false;
+Room.prototype.generateDropOff = function (target, targetJobAmount){
+    let currentJobAmount = 0;
     for(let dropOff in this.memory.dropOffs){
         let currentDropOff = this.memory.dropOffs[dropOff];
-        
-        if(currentDropOff.target === target.id ){
-            hasJob = true
-            break;
-        } if(Game.creeps[currentDropOff.assignee] === undefined && currentDropOff.isAssigned){
+        if(currentDropOff.target === target.id){
+            currentJobAmount++;
+        }
+        if(currentJobAmount > 5){
             delete this.memory.dropOffs[dropOff];
-            break;
-        } if(currentDropOff.isAssigned && Game.creeps[currentDropOff.assignee] != undefined){
+        }
+        if(Game.creeps[currentDropOff.assignee] === undefined && currentDropOff.isAssigned){
+            delete this.memory.dropOffs[dropOff];
+        } else if(currentDropOff.isAssigned && Game.creeps[currentDropOff.assignee] != undefined){
             if(Game.creeps[currentDropOff.assignee].dropOff === undefined){
                 delete this.memory.dropOffs[dropOff];
             }
         }
     }
-    if(hasJob){
-        return;
-    } else{
-        let name = generateName('dropOff');
-        if(target.id != undefined){
+    for(let i = 0; i < targetJobAmount; i++){
+        if(targetJobAmount < currentJobAmount){
+            break;
+        }else{
+            let name = generateName('dropOff');
             this.memory.dropOffs[name] = {target: target.id, isAssigned: false, name: name, assignee: undefined };
         }
+        currentJobAmount++;
     }
-    
 }
 
 function generateName(jobName){

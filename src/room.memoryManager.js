@@ -56,7 +56,8 @@ module.exports = {
             }
             let memory = {
                 id: container.id,
-                type: containerType
+                type: containerType,
+                pos: container.pos
             }
             containerMem.push(memory);
             room.memory.containers = containerMem;

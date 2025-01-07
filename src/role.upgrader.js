@@ -2,11 +2,27 @@ module.exports = {
     /** @param {Creep} creep **/
     run: function(creep) {
         if(creep.memory.spot != undefined){
-            let path = creep.memory.spot.path.path;
-            let spot = creep.memory.spot.path;
+            const path = creep.memory.spot.path.path;
+            const spot = creep.memory.spot.path;
+            const center = creep.room.memory.upgraderInfo.center;
+            if(creep.memory.storage === undefined){
+                let centerTile = creep.room.lookAt(center.x, center.y) 
+                if(!_.isEmpty(centerTile)){
+                    for(let name in centerTile){
+                        if(centerTile[name].type === 'structure'){
+                            if(centerTile[name].structure.structureType === 'container'){
+                                creep.memory.storage = centerTile[name].structure.id;
+                            }
+                        }
+                    }
+                }
+            }
+ 
             if(creep.pos.x === spot.x && creep.pos.y === spot.y){
-                creep.upgradeController(creep.room.controller)
-                creep.giveWay();
+                if(creep.memory.storage != undefined){
+                    creep.withdraw(Game.getObjectById(creep.memory.storage), RESOURCE_ENERGY);
+                }
+                creep.upgradeController(creep.room.controller);
                 return;
             }
             if(path[0] === undefined){
@@ -22,6 +38,5 @@ module.exports = {
             }
             creep.giveWay();
         }
-        creep.giveWay();
 	}
 };
