@@ -25,7 +25,7 @@ Room.prototype.spawnManager = function(){
                     upgraderParts = Math.floor(roomNetIncome * diff);
                 } else {
                     const minUpgraderParts = 2;
-                    builderParts = Math.floor((roomNetIncome - minUpgraderParts));
+                    builderParts = Math.floor((roomNetIncome - minUpgraderParts) / 3);
                     upgraderParts = Math.floor(minUpgraderParts * diff);
                 }
                 let currentSpawn = spawns[name];
@@ -126,6 +126,10 @@ Room.prototype.isMaintainerNeeded = function(assignedSpawn){
                         filter: (s) =>  s.hits < s.hitsMax
     });
     if(toRepair === undefined){
+        return;
+    }
+    let assignedWorkParts = assignedRoleWorkParts(this.name, 'maintainer');
+    if(assignedWorkParts < 1){
         return;
     }
     let totalHitsToRepair = 0;

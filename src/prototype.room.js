@@ -1,30 +1,27 @@
 require('prototype.room.jobManager');
 require('prototype.room.spawnManager');
 
+const memoryManager = require('room.memoryManager');
 const plannerUpgraderLocation = require('planner.upgradeLocation');
-
-let containerMemmory = {
-    id: undefined,
-    stored: 0
-}
 
 Room.prototype.roomManager = function(){
     // Executes after a certain amount of ticks
     let currentTick = Game.time;
-    if(this.memory.lastExecution === undefined){
-        this.memory.lastExecution = currentTick;
-    } else if(this.memory.lastExecution + 5 < currentTick){
+    if(currentTick % 5){
+        if(this.memory === undefined){
+            memoryManager.init(this);
+        } else if(currentTick % 500){
+            memoryManager.update(this);
+        }
+        
         this.memory.lastExecution = currentTick;
         this.jobManager();
         this.spawnManager();
     }
     
-    //new RoomVisual(this.name).rect(this.controller.pos.x - 3.5, this.controller.pos.y - 3.5, 7, 7)
-    if(this.memory.upgraderInfo === undefined){
-            plannerUpgraderLocation.createUpgradeLocations(this.name);
-        } else{
-            plannerUpgraderLocation.visualiseUpgraderSpots(this.name);
-        }
+    if(this.memory.upgraderInfo != undefined){
+        plannerUpgraderLocation.visualiseUpgraderSpots(this.name);
+    }
 }
 
 Room.prototype.getSpecificBodyPartCountForSource = function(creeps, role, bodyPart, source){
