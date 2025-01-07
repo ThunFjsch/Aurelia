@@ -33,7 +33,7 @@ Creep.prototype.giveWay = function()
     }
 
     // Move a random direction to get out of their way
-    this.say("Giving way", true);
+    this.say('🏃🏻️');
     this.move(getRandomDirection());
     delete this.memory.blocking;
 }

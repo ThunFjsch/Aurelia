@@ -9,9 +9,9 @@ var roleBuilder = {
             if(constructionSite != undefined) {
                 if(creep.build(constructionSite) === ERR_NOT_IN_RANGE){
                     creep.moveTo(constructionSite, {visualizePathStyle: {stroke: '#ffffff'}});
-                }// else {
-                   // creep.moveTo(constructionSite, {avoid: creep.room.find(FIND_CONSTRUCTION_SITES), visualizePathStyle: {stroke: '#ffffff'}});
-                //}
+                } else if(creep.build(constructionSite) === OK) {
+                    creep.say('🛠️');
+                }
                 creep.giveWay();
             } else{
                 roleUpgrader.run(creep);

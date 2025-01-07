@@ -5,6 +5,7 @@ module.exports = {
         if (creep.memory.state) {
             if(creep.room.name === creep.memory.home){
                 creep.getDropOff();
+                creep.giveWay();
             } else {
                // delete creep.memory.dropOff;
                 var exit = creep.room.findExitTo(creep.memory.home);
@@ -15,6 +16,7 @@ module.exports = {
         else {
             if(creep.room.name === creep.memory.target){
                 creep.getPickUp();
+                creep.giveWay();
             } else {
                // delete creep.memory.pickup;
                 var exit = creep.room.findExitTo(creep.memory.target);
