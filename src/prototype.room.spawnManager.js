@@ -129,7 +129,7 @@ Room.prototype.isMaintainerNeeded = function(assignedSpawn){
         return;
     }
     let assignedWorkParts = assignedRoleWorkParts(this.name, 'maintainer');
-    if(assignedWorkParts < 1){
+    if(assignedWorkParts > 1){
         return;
     }
     let totalHitsToRepair = 0;
@@ -137,11 +137,10 @@ Room.prototype.isMaintainerNeeded = function(assignedSpawn){
         let sum = toRepair[i].hitsMax - toRepair[i].hits;
         totalHitsToRepair += sum;
     }
-    if(totalHitsToRepair >= 150000){
+    if(totalHitsToRepair >= 100000){
         const memory = {role: 'maintainer', state: false, target: this.name};
         return spawnState = assignedSpawn.generalCreep(this.name,'maintainer', 1, creepBodies.startBuilder, memory);
     }
-    console.log(totalHitsToRepair)
 }
 
 Room.prototype.isBuilderNeeded = function(assignedSpawn, maxBuilderParts){
