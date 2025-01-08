@@ -179,7 +179,7 @@ module.exports = {
                             const containers = Game.rooms[source.room].memory.containers;
                             for(let name in containers){
                                 const container = Game.getObjectById(containers[name].id);
-                                if(container != undefined && container.pos.x === source.miningSpots[spot].x && container.pos.x === source.miningSpots[spot].x){
+                                if(container != undefined && container.pos.x === source.miningSpots[spot].x && container.pos.y === source.miningSpots[spot].y){
                                     assignedPath = source.miningSpots[spot];
                                     assignedSpot = spot;
                                     break;      

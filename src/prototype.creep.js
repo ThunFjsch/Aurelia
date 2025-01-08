@@ -48,7 +48,7 @@ Creep.prototype.getDropOff = function(){
             delete this.room.memory.dropOffs[this.memory.dropOff.job];
         }
         if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
-            this.moveTo(target, {visualizePathStyle: {stroke: '#c0ffc3'}});
+            this.moveTo(target, {reusePath: 50, visualizePathStyle: {stroke: '#c0ffc3'}});
         } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_RESOURCES){
             delete this.memory.dropOff;
         } else if(this.transfer(target, RESOURCE_ENERGY) === ERR_INVALID_TARGET || ERR_FULL){
@@ -84,7 +84,7 @@ Creep.prototype.getPickUp = function(){
         const target = Game.getObjectById(this.memory.pickup.target);
         if(this.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE || this.pickup(target) === ERR_NOT_IN_RANGE){
             //console.log(this.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}}))
-            this.moveTo(target, {visualizePathStyle: {stroke: '#00FFFF'}});
+            this.moveTo(target, {reusePath: 50, visualizePathStyle: {stroke: '#00FFFF'}});
         } else if(this.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_ENOUGH_ENERGY || ERR_INVALID_TARGET){
             //console.log('Err: Job was outdated');
             delete this.memory.pickup;

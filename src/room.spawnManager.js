@@ -88,6 +88,7 @@ Room.prototype.isUpgraderNeeded = function(assignedSpawn, maxUpgraderParts){
         let assignedPath;
         let assignedSpot;
         const spots = this.memory.upgraderInfo.spots;
+        delete spots[spots.length - 1];
         if(spots === undefined){
             return;
         }

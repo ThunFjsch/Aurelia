@@ -1,7 +1,7 @@
 
-require('prototype.room');
-require('prototype.spawn');
-require('prototype.tower');
+require('room');
+require('structure.spawn');
+require('structure.tower');
 require('prototype.creep');
 require("giveWay");
 require("stuckRepath");
@@ -10,9 +10,9 @@ const profiler = require('screeps-profiler');
 const eco = require('ecoCalculator');
 
 // This line monkey patches the global prototypes
-//profiler.enable();
+profiler.enable();
 module.exports.loop = function () {
-    //profiler.wrap(function() {
+    profiler.wrap(function() {
         // Executes the screep logic first
         for (let creep in Memory.creeps) {
             // and checking if the creep is still alive
@@ -56,18 +56,18 @@ module.exports.loop = function () {
             eco.theoNetIndome();
         }
 
-        // currently displays some eco info. Will be handled better
-        // if(Memory.sourceEco != undefined){
-        //     let totalNetincome = 0;
-        //     let totalCarry = 0;
-        //     for(let i = 0; i < Memory.sourceEco.length; i++){
-        //         const info = Memory.sourceEco[i];
-        //         totalNetincome += info.net;
-        //         totalCarry += info.carryParts;
-        //         new RoomVisual(info.room).text(`Room: ${info.room} | Netincome: ${info.net} | CarryParts: ${info.carryParts}`, 10, 15 + i, {color: 'green', font: 0.8});  
-        //     }
-        //     console.log('total net income: ' + totalNetincome);
-        //     console.log('total carry: ' + totalCarry);
-        // }
-    //});
+        //currently displays some eco info. Will be handled better
+        if(Memory.sourceEco != undefined){
+            let totalNetincome = 0;
+            let totalCarry = 0;
+            for(let i = 0; i < Memory.sourceEco.length; i++){
+                const info = Memory.sourceEco[i];
+                totalNetincome += info.net;
+                totalCarry += info.carryParts;
+                new RoomVisual(info.room).text(`Room: ${info.room} | Netincome: ${info.net} | CarryParts: ${info.carryParts}`, 10, 15 + i, {color: 'green', font: 0.8});  
+            }
+          //  console.log('total net income: ' + totalNetincome);
+        //    console.log('total carry: ' + totalCarry);
+        }
+    });
 }
