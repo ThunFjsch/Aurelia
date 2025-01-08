@@ -1,5 +1,5 @@
-require('prototype.room.jobManager');
-require('prototype.room.spawnManager');
+require('room.jobManager');
+require('room.spawnManager');
 
 const memoryManager = require('room.memoryManager');
 const plannerUpgraderLocation = require('planner.upgradeLocation');
