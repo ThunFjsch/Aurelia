@@ -23,6 +23,7 @@ module.exports = {
                     creep.withdraw(Game.getObjectById(creep.memory.storage), RESOURCE_ENERGY);
                 }
                 creep.upgradeController(creep.room.controller);
+                creep.giveWay();
                 return;
             }
             if(path[0] === undefined){

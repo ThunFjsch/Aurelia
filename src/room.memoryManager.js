@@ -123,7 +123,9 @@ module.exports = {
         room.memory.upgraderInfo = upgraderInfo;
     },
     updateUpgraderSpots: function(room){
-        delete room.memory.upgraderInfo;
-        this.initUpgraderSpots(room);
+        if(room.memory.upgraderInfo === undefined){
+            delete room.memory.upgraderInfo;
+            this.initUpgraderSpots(room);
+        }
     }
 }
