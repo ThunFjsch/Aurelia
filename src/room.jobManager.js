@@ -161,7 +161,7 @@ Room.prototype.manageDropOffs = function(dropOffTargets){
             const usedSpace = target.store.getUsedCapacity(RESOURCE_ENERGY);
             const totalSpace = target.store.getCapacity(RESOURCE_ENERGY);
             if(usedSpace < totalSpace){
-                let targetDropOffs = (totalSpace - usedSpace) % CARRY_CAPACITY;
+                let targetDropOffs = Math.floor((totalSpace - usedSpace) / CARRY_CAPACITY);
                 if(targetDropOffs < 5){
                     targetDropOffs = 5;
                 }
@@ -178,14 +178,14 @@ Room.prototype.generateDropOff = function (target, targetJobAmount){
         if(currentDropOff.target === target.id){
             currentJobAmount++;
         }
-        if(currentJobAmount > 5){
+        if(currentJobAmount > targetJobAmount){
             delete this.memory.dropOffs[dropOff];
         }
         if(Game.creeps[currentDropOff.assignee] === undefined && currentDropOff.isAssigned){
             delete this.memory.dropOffs[dropOff];
         } else if(currentDropOff.isAssigned && Game.creeps[currentDropOff.assignee] != undefined){
             if(Game.creeps[currentDropOff.assignee].dropOff === undefined){
-                delete this.memory.dropOffs[dropOff];
+                // delete this.memory.dropOffs[dropOff];
             }
         }
     }

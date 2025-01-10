@@ -37,9 +37,8 @@ Creep.prototype.getDropOff = function(){
         }
     } else if(this.memory.dropOff.target === undefined){
         delete this.memory.dropOffs;
-    } else if(this.room.memory.dropOffs[this.memory.dropOff.target]){
+    } else if(this.room.memory.dropOffs[this.memory.dropOff.job] === undefined){
         delete this.memory.dropOff;
-        delete this.room.memory.dropOffs[this.memory.dropOff.job];
     } else {
         
         const target = Game.getObjectById(this.memory.dropOff.target);
