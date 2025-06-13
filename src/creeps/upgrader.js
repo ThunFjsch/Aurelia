@@ -39,6 +39,10 @@ export class Upgrader {
                 }
             }
             creep.giveWay();
+        } else {
+            if(creep.upgradeController(creep.room.controller) != OK){
+                creep.moveTo(creep.room.controller.pos, {range: 3})
+            }
         }
 	}
 };

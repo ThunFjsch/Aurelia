@@ -9,7 +9,7 @@ Room.prototype.jobManager = function(){
             this.generateDeletePickUpRequest(drop.amount, drop.id)
         }
     }
-    
+
     const containers = this.memory.containers;
     let upgradeContainer = false;
     let fillerContiainer = false;
@@ -25,14 +25,14 @@ Room.prototype.jobManager = function(){
                 fillerContiainer = true;
                 dropOffContainer.push(Game.getObjectById(container.id))
             } else if(container.type === 'upgrade'){
-                upgraderContainer = true;
+                upgradeContainer = true;
                 dropOffContainer.push(Game.getObjectById(container.id))
-            } 
+            }
         }
         this.manageDropOffs(dropOffContainer)
     }
-    
-    
+
+
     // creates drop off requests
     const towers = this.find(FIND_MY_STRUCTURES, {
         filter: (s) => s.structureType === STRUCTURE_TOWER
@@ -40,26 +40,30 @@ Room.prototype.jobManager = function(){
     if(towers != undefined){
         this.manageDropOffs(towers);
     }
-    
+
     let workerCreeps;
     if(upgradeContainer){
-        this.find(FIND_MY_CREEPS, {
-            filter: (c) => (c.memory.role === 'builder' || 
-                        c.memory.role === 'maintainer' || 
+        const creeps = this.find(FIND_MY_CREEPS, {
+            filter: (c) => (c.memory.role === 'builder' ||
+                        c.memory.role === 'maintainer' ||
                         c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
         });
+        this.manageDropOffs(creeps)
     } else {
-        this.find(FIND_MY_CREEPS, {
-            filter: (c) => (c.memory.role === 'builder' || 
-                        c.memory.role === 'maintainer' || 
+        const creeps = this.find(FIND_MY_CREEPS, {
+            filter: (c) => (
+                        c.memory.role === 'upgrader' ||
+                        c.memory.role === 'builder' ||
+                        c.memory.role === 'maintainer' ||
                         c.memory.role === 'wallRepairer') && c.store.getUsedCapacity(RESOURCE_ENERGY) < 20 && c.memory.target === this.name
         });
+        this.manageDropOffs(creeps)
     }
 
     if(workerCreeps != undefined){
         this.manageDropOffs(workerCreeps);
     }
-    
+
     const extensions = this.find(FIND_MY_STRUCTURES, {
         filter: (s) => s.structureType === STRUCTURE_EXTENSION
     });
@@ -73,7 +77,7 @@ Room.prototype.jobManager = function(){
     if(roomSpawns != undefined){
         this.manageDropOffs(roomSpawns);
     }
-    
+
     const roomStorage = this.find(FIND_MY_STRUCTURES, {
         filter: (s) => s.structureType === STRUCTURE_STORAGE
     });
@@ -87,11 +91,11 @@ Room.prototype.generateDeletePickUpRequest = function(resourceCapacity, targetId
     // Each transport can carry 100E so for each 100E one pickUp requests gets generated
     const pickUpRequests = this.calculatePickUpRequests(resourceCapacity);
 
-    // if there are no pickUps, create the object and generate jobs 
+    // if there are no pickUps, create the object and generate jobs
     if(this.memory.pickups === undefined){
         this.memory.pickups = {};
         this.generatePickUp(targetId, pickUpRequests);
-    } 
+    }
     // Create and delete pickUp jobs
     else {
         let currentPickUpRequests = this.getCurrentPickUps(targetId);
@@ -122,7 +126,7 @@ Room.prototype.getCurrentPickUps = function(targetId) {
         if(currentPickUp.isAssigned === true && currentPickUp.assignee === undefined){
             this.memory.pickups[pickUp].isAssigned = false;
         }
-        // If creep is dead and has a task, reset it. 
+        // If creep is dead and has a task, reset it.
         else if(currentPickUp.isAssigned === true && Game.creeps[this.memory.pickups[pickUp].assignee] === undefined){
             currentPickUp.isAssigned = false;
             currentPickUp.assignee = undefined;
@@ -131,7 +135,7 @@ Room.prototype.getCurrentPickUps = function(targetId) {
             currentPickUp.isAssigned = false;
             currentPickUp.assignee = undefined;
         }
-        
+
         // current job has container id, add to the requests
         if(currentPickUp.target === targetId){
             currentRequests++;

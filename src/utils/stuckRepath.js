@@ -14,7 +14,7 @@ Creep.prototype.moveTo = function(firstArg, secondArg, opts)
     pathAroundCreepsIfStuck(this, secondArg, opts);
 
     const result = moveTo.call(this, firstArg, secondArg, opts);
-    
+
     this.memory.triedMoving = result === OK;
     return result;
 }
@@ -50,9 +50,7 @@ function pathAroundCreepsIfStuck(creep, secondArg, opts)
 {
     if(!creep.memory.isStuck)
         return;
-    
-    creep.say("🚧");
-    
+
     // Don't worry about this. Essentially either of these may be the true opts-object due to how moveTo works internally
     if(typeof(secondArg) === "number")
     {

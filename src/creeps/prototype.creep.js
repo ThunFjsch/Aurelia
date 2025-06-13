@@ -4,7 +4,7 @@ import {Maintainer} from './maintainer';
 import {WallRepairer} from './wallRepairer';
 import {Claimer} from './claimer';
 import {Miner} from './miner';
-import {Transporter} from './transport';
+import {Transporter} from './transporter';
 import {Fighter} from './fighter';
 import {Healer} from './healer';
 import {FighterRanged} from './fighterRanged';
@@ -130,7 +130,7 @@ Creep.prototype.switchWorkState = function(){
         delete this.memory.dropOff;
     }
     // if creep is harvesting energy but is full
-    else if (this.memory.state === false && this.carry.energy === this.carryCapacity) {
+    else if (this.memory.state === false && this.carry.energy >= this.carryCapacity/2) {
         // switch state
         this.memory.state = true;
     }

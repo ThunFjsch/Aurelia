@@ -1,4 +1,4 @@
-// import './role.upgrader'
+import {Upgrader} from './upgrader'
 
 export class Builder {
     constructor(){}
@@ -8,14 +8,16 @@ export class Builder {
         if(creep.room.name === creep.memory.target){
             var constructionSite = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
             if(constructionSite != undefined) {
-                if(creep.build(constructionSite) === ERR_NOT_IN_RANGE){
-                    creep.moveTo(constructionSite, {visualizePathStyle: {stroke: '#ffffff'}});
+                if(creep.build(constructionSite) === ERR_NOT_IN_RANGE || ERR_NOT_ENOUGH_RESOURCES){
+                    creep.moveTo(constructionSite, {range: 3, visualizePathStyle: {stroke: '#ffffff'}});
                 } else if(creep.build(constructionSite) === OK) {
-                    creep.say('🛠️');
+
                 }
                 creep.giveWay();
             } else{
-                // roleUpgrader.run(creep);
+                const upgrader = new Upgrader()
+                creep.memory.role = 'upgrader';
+                upgrader.run(creep);
             }
         } else {
             // delete creep.memory.dropOff;

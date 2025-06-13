@@ -74,4 +74,5 @@ module.exports.loop = function () {
         //    console.log('total carry: ' + totalCarry);
         }
     });
+    console.log(Game.cpu.getUsed());
 }

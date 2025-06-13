@@ -22,7 +22,7 @@ Room.prototype.spawnManager = function(){
                 let upgraderParts = 0;
                 let builderParts = 0;
                 // allows for more precision for spawning upgraders.
-                let diff = 0.4;
+                let diff = 0.2;
                 if(_.isEmpty(constructionSites)){
                     upgraderParts = Math.floor(roomNetIncome * diff);
                 } else {
@@ -43,7 +43,6 @@ Room.prototype.spawnManager = function(){
                     this.isBuilderNeeded(currentSpawn, builderParts);
                 }
                 if(spawnState === undefined && hasMiner){
-                    console.log(upgraderParts)
                     this.isUpgraderNeeded(currentSpawn, upgraderParts);
                 }
             }
