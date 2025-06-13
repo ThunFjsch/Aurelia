@@ -1,4 +1,6 @@
-const creepBodies = require('creep.body');
+import {CreepBodies} from './creeps/creepBodies';
+
+const creepBodies = new CreepBodies();
 
 let listOfRoles = [
     'harvester',
@@ -20,7 +22,7 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     let room = this.room;
     // find all creeps in room
     let creepsInRoom = room.find(FIND_MY_CREEPS);
-    
+
     // count the number of creeps alive for each role in this room
     // _.sum will count the number of properties in Game.creeps filtered by the
     //  arrow function, which checks for the creep being a specific role
@@ -28,9 +30,9 @@ StructureSpawn.prototype.spawnCreepWhenNeeded = function(){
     for (let role of listOfRoles) {
         numberOfCreeps[role] = _.sum(creepsInRoom, (c) => c.memory.role == role);
     }
-    let maxEnergy = room.energyAvailable;    
+    let maxEnergy = room.energyAvailable;
     let name = undefined;
-    
+
     // if none of the above caused a spawn command check for other roles
     if (name == undefined) {
         for (let role of listOfRoles) {
@@ -107,7 +109,7 @@ StructureSpawn.prototype.spawnMiner = function(energy, sourceId, target, miningW
         if(body.length === 1){
             return ERR_NOT_ENOUGH_ENERGY;
         }
-        
+
         return this.spawnCreep(body, name,{memory: { role: 'miner', sourceId: sourceId, target: target, path: assignedPath }});
 };
 
@@ -130,11 +132,11 @@ StructureSpawn.prototype.createTransporter = function (energy, roleName, target,
     // create creep with the created body and the role 'lorry'
     if(!_.isEmpty(body)){
         return this.spawnCreep(
-            body, 
-            this.generateName(roleName), 
-            {memory: { 
-                role: roleName, 
-                state: false, 
+            body,
+            this.generateName(roleName),
+            {memory: {
+                role: roleName,
+                state: false,
                 target: target,
                 home: home }
             });

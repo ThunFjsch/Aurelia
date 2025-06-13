@@ -1,13 +1,14 @@
 
-require('room');
-require('structure.spawn');
-require('structure.tower');
-require('prototype.creep');
-require("giveWay");
-require("stuckRepath");
-const sourceManager = require('sourceManager');
-const profiler = require('screeps-profiler');
-const eco = require('ecoCalculator');
+import './room/room';
+import './structure.spawn';
+import './defence/structure.tower';
+import './creeps/prototype.creep';
+import './utils/giveWay';
+import './utils/stuckRepath';
+import {sourceManager} from './economy/sourceManager';
+import profiler from './utils/screeps-profiler';
+import {Economy} from './economy/ecoCalculator';
+
 
 // This line monkey patches the global prototypes
 profiler.enable();
@@ -29,30 +30,33 @@ module.exports.loop = function () {
             // run tower logic
             tower.defend();
         }
-        
+
+        const SourceManager = new sourceManager();
         if(Memory.sourceInfo === undefined){
-            sourceManager.init();
+            SourceManager.init();
         } else{
-            sourceManager.spawnMinerForSources();
+            SourceManager.spawnMinerForSources();
         }
-        
+
+
         for(let room in Memory.rooms){
             if(Game.rooms[room] != undefined){
                 Game.rooms[room].roomManager();
             }
         }
-        
+
         for (let spawnName in Game.spawns) {
             // run spawn logic
             Game.spawns[spawnName].spawnCreepWhenNeeded();
         }
-    
+
         for (let name in Game.creeps) {
             // run creep logic
             Game.creeps[name].runRole();
         }
 
         if(Game.time % 32){
+            const eco = new Economy();
             eco.theoNetIndome();
         }
 
@@ -64,7 +68,7 @@ module.exports.loop = function () {
                 const info = Memory.sourceEco[i];
                 totalNetincome += info.net;
                 totalCarry += info.carryParts;
-                new RoomVisual(info.room).text(`Room: ${info.room} | Netincome: ${info.net} | CarryParts: ${info.carryParts}`, 10, 15 + i, {color: 'green', font: 0.8});  
+                new RoomVisual(info.room).text(`Room: ${info.room} | Netincome: ${info.net} | CarryParts: ${info.carryParts}`, 10, 15 + i, {color: 'green', font: 0.8});
             }
           //  console.log('total net income: ' + totalNetincome);
         //    console.log('total carry: ' + totalCarry);
